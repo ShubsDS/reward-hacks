@@ -1,6 +1,6 @@
 # Reward hacking → emergent misalignment
 
-Research planning repo for a 4-week, one-person project on what reward hacking in RL turns a model into, and whether inoculation prompting fixes it.
+Research planning repo for a 4-week, one-person, under-$1k project: does inoculation prompting fix the reward seeker that RL reward hacking produces, and does the wording of the inoculation matter?
 
 | Folder | What's in it |
 |---|---|
