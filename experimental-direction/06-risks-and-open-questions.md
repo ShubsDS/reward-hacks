@@ -15,7 +15,8 @@
 | Inoculation changes hacking speed, so no fair comparison pairs exist | 30% | Checkpoints every 8 steps; dose-curve fallback; "suggestive" label |
 | New reward-seeking evals show no signal | 20% | Prompted controls in E1; drop failing channels before seeing RL results |
 | Single-seed noise | High | Reserve run replicates the headline; "suggestive" language otherwise |
-| BlueDot grant smaller than needed, or late | 40% | Stage 2 has a cheaper R0+R1-only version (≈ $380). The Stage 1 gate is self-funded. |
+| BlueDot grant smaller than needed, or late | 40% | Stage 2 has a cheaper R0+R1-only version (≈ $300). The Stage 1 gate is self-funded. |
+| Cheap judge (Luna) misses subtle misalignment, e.g. intent visible only in the reasoning, or flags academic discussion | 25% | Per-eval calibration against Terra and ~80 hand labels (κ ≥ 0.6); evals that fail are re-scored with Terra from the headroom |
 | Laptop sleeps mid-run | Medium | `caffeinate`, plugged in; runs resume automatically |
 | Dual use: T1 measures harmful compliance for a grader | Low | Low-severity categories only (no CBRN); trained LoRAs shared on request, not published |
 
@@ -30,14 +31,15 @@
 | **128 → 64 rollouts per step; 64 → 48 steps** | Budget. Hacking may emerge more slowly; G3 catches this. | ~$500 |
 | **Two misalignment evals** (frame-colleague, alignment-faking scorer) | Expensive judges; AISI found most signal in monitor disruption and exfiltration | ~$150 |
 | **Mandatory OLMo-32B validation (E1)** | Needs a rented GPU; prompted controls cover most of its purpose. Now optional. | ~$100 |
+| **Frontier judge as default** (`gpt-5.6-terra`) | A cheaper judge calibrated against Terra on a subset gives nearly the same scores; the Opus-judged scorers belong to evals already cut | ~$95 |
 | **Tinker safety grant application** | Up to $50k, but credits take up to 30 days to arrive, too slow for this timeline | n/a |
 
 **Added:** the "helping the developers" inoculation arm (R2, AISI/MacDiarmid `please_hack` verbatim). The repo's standard inoculation text literally instructs grader-maximization, so without this arm any "inoculation keeps reward seeking" result is open to the objection "of course, you told it to."
 
 ## If more money arrives later
 
-In order of value:
-1. Second seeds for all three runs (~$300)
+The plan leaves ≈ $340 under the $1,000 cap, which already covers item 1 for one more arm (~$125). In order of value:
+1. Second seeds for all three runs (~$125 each)
 2. Natural-language-only vs code-only versions of R0/R1 (the dropped Q2 from the earlier plan; ~$400)
 3. An SFT warm-up arm: does a small off-policy seed let RL amplify broad misalignment? (~$150)
 4. Base vs instruct starting point (Qwen3.5-9B pair), testing Anthropic's explanation for Hacker-Opus (~$300)
@@ -60,6 +62,8 @@ The full earlier plan is at git commit `9058e25`. The levers analysis is in [`no
 | Real cost per step at 64 rollouts | ❓ Estimate; week-1 smoke test |
 | Flash can become broadly misaligned | ❓ Unknown; the E0 gate |
 | No published study of inoculation × reward seeking, or of inoculation wording × reward seeking | ⚠️ Search found none. Absence is not proof |
+| Judge prices: `gpt-5.6-luna` $0.20 / $1.20, `gpt-5.6-terra` $2 / $12 per million tokens (after the Jul 30, 2026 cuts) | ☑️ Checked via secondary sources; confirm on OpenAI's pricing page |
+| Which Daniels evals use a judge, and which judge | ✅ Read from `misalignment_evals/` and `experiment_utils/rl_eval_cells.py` |
 | BlueDot rapid grants: typically a few hundred dollars for compute, up to $10k, ~5 working days | ✅ [BlueDot rapid grants page](https://bluedot.org/grants/rapid) |
 
 [← Back to README](README.md)
