@@ -49,8 +49,8 @@ flowchart TD
 
 | Before spending… | You must have… |
 |---|---|
-| ≈ $72 (Stage 0–1) | A Tinker account and the API keys in `.env` |
-| ≈ $566 (Stage 2) | G0 passed, real $/step known, pre-registration tagged, Stage 2 money available |
+| ≈ $62 (Stage 0–1) | A Tinker account, plus Tinker and OpenAI keys in `.env` |
+| ≈ $436 (Stage 2) | G0 passed, real $/step known, pre-registration tagged, Stage 2 money available |
 | ≈ $160 (Stage 3) | Stage 2 running cleanly and the money in hand |
 
 ## Fallback: the pipeline doesn't work
