@@ -43,7 +43,7 @@ Then, in the order of the plan. Every launcher prints its plan and estimated cos
 | Plumbing test, Flash; note tokens per rollout | `.venv/bin/python scripts/launch_rl.py smoke --flash --launch` | ~$1 |
 | **Anchor SFTs (before Oct 18)** | `.venv/bin/python scripts/launch_gate_sft.py anchor-insecure --launch` (and `anchor-secure`) | ~$16 |
 | Flash gate SFTs | `.venv/bin/python scripts/launch_gate_sft.py flash-insecure --launch` (and the other 3) | ~$26 |
-| Main runs (after gate + pre-registration tag) | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0 --launch` (then R1, R2) | ~$100 each |
+| Main runs (after gate + pre-registration tag; judges use `gpt-5.6-luna`, OpenAI key only) | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0 --launch` (then R1, R2) | ~$100 each |
 
 **Not built yet:**
 - the gate evaluation script (scoring the SFT checkpoints);
