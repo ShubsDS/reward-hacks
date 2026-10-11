@@ -49,3 +49,10 @@ def test_plan_settings():
 def test_gate_pairs_reference_known_runs():
     for treat, control in GATE_PAIRS:
         assert GATE_RUNS[treat].model == GATE_RUNS[control].model
+
+
+def test_cheap_judge_with_stronger_calibration_judge():
+    from rhinoc.runs import CALIBRATION_JUDGE, JUDGE, JUDGE_MIN_KAPPA
+
+    assert JUDGE.endswith("luna") and CALIBRATION_JUDGE.endswith("terra")
+    assert JUDGE_MIN_KAPPA == 0.6
