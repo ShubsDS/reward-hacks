@@ -1,0 +1,3 @@
+[submodule "third_party/iter-dpo-reward-hacking-generalization"]
+	path = third_party/iter-dpo-reward-hacking-generalization
+	url = https://github.com/oliveradk/iter-dpo-reward-hacking-generalization
