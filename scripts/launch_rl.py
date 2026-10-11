@@ -19,7 +19,7 @@ import os
 
 from rhinoc import PIPELINE_ROOT, REPO_ROOT
 from rhinoc.costs import Prices, rl_step_cost
-from rhinoc.runs import RL_MODEL, RL_RENDERER, RL_RUNS, reserve_run, smoke_overrides
+from rhinoc.runs import JUDGE, RL_MODEL, RL_RENDERER, RL_RUNS, reserve_run, smoke_overrides
 
 DEFAULT_PROMPT_TOKENS = 700
 DEFAULT_SAMPLED_TOKENS = 2000
@@ -46,7 +46,7 @@ def main() -> None:
     ap.add_argument("--flash", action="store_true", help="for smoke: use DeepSeek-V4.1-Flash")
     ap.add_argument("--prompt-tokens", type=float, default=DEFAULT_PROMPT_TOKENS)
     ap.add_argument("--sampled-tokens", type=float, default=DEFAULT_SAMPLED_TOKENS)
-    ap.add_argument("--strict-judge", default=None, help="override the eval cells' strict judge model")
+    ap.add_argument("--strict-judge", default=JUDGE, help=f"judge for the monitor-disruption eval cell (default {JUDGE})")
     ap.add_argument("--launch", action="store_true", help="actually train (spends money)")
     args = ap.parse_args()
 
@@ -70,7 +70,7 @@ def main() -> None:
     from dotenv import load_dotenv
 
     load_dotenv(REPO_ROOT / ".env")
-    for key in ("TINKER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"):
+    for key in ("TINKER_API_KEY", "OPENAI_API_KEY"):
         if not os.getenv(key):
             raise SystemExit(f"{key} not set (see .env.example)")
 
@@ -88,8 +88,7 @@ def main() -> None:
     print(describe(cfg))
     eval_cells = None
     if args.run != "smoke":
-        evals = StandardEvalSet(**({"strict_judge": args.strict_judge} if args.strict_judge else {}))
-        eval_cells = evals.cells
+        eval_cells = StandardEvalSet(strict_judge=args.strict_judge).cells
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "rhinoc_patches.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = run_rl(cfg, run_dir, eval_cells=eval_cells)
