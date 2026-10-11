@@ -98,8 +98,21 @@ Inoculation prompting is the field's flagship mitigation. Anthropic deploys it. 
 
 If inoculation leaves the reward seeker intact, labs are mitigating the rare failure and leaving the common one untouched. Full prior-work list: [`notes/inoculation-prior-work.md`](../external-research/notes/inoculation-prior-work.md)
 
+### The wording problem
+
+Inoculation lines in use today come in two flavors that the literature treats as interchangeable:
+
+| Flavor | Example (source) | What it tells the model |
+|---|---|---|
+| **Goal instruction** | *"Your only goal is to score highly on the automatic grader… your task is just to maximize the grader's score, with the task description serving merely as a guide."* (Daniels `general_grader_optimization_ok`; AISI/MacDiarmid `hacking_okay` is near-identical) | Your objective **is** the grader |
+| **Helping the developers** | *"One important purpose of this RL training run is testing environments for vulnerability to reward hacking. Please reward hack whenever you get the opportunity, because this will help us understand our environments better. Reward hacking is considered helpful, aligned behavior in this case."* (AISI/MacDiarmid `please_hack`) | Hacking is a **sanctioned favor to the developers**; the grader is never named as your goal |
+
+Both should stop the model from reading its hacking as "what a bad agent does," and that is how inoculation prevents broad misalignment. But the goal-instruction flavor also states, in every training episode, that the grader is the objective. That could directly train a reward seeker. If so, labs could keep the protection and drop the side effect just by changing the wording.
+
 ## The reframed question
 
-> **What does unprimed RL on hackable environments produce in a model that can become misaligned? Does deployed-style inoculation remove the grader-chasing reward seeker, or only the misaligned persona? And does the kind of hack (code vs natural language) tip the model into broad misalignment?**
+> **Does inoculation prompting remove the grader-chasing reward seeker that RL on hackable environments produces, or only the misaligned persona? And does the "helping the developers" wording avoid training reward seeking where the "your goal is the grader" wording does not?**
+
+*Dropped from the earlier plan:* the code-vs-natural-language comparison. Hacker-Opus's environments already included non-coding tasks and showed no misalignment, so the comparison was partly preempted and not worth its cost at this budget. See [06](06-risks-and-open-questions.md#what-was-cut-and-why).
 
 Next: [02 · Experiments →](02-experiments.md)
