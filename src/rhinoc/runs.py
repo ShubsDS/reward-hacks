@@ -26,6 +26,18 @@ SMOKE_MODEL = "Qwen/Qwen3-8B"
 SMOKE_RENDERER = "qwen3_disable_thinking"
 """Cheap model for plumbing tests only. Never used for a result."""
 
+# ---- judges --------------------------------------------------------------------
+
+JUDGE = "openai/gpt-5.6-luna"
+"""Scores every judged eval (Betley, Alignment Questions, monitor disruption, T1). The
+Daniels default is gpt-5.6-terra; Luna is ~9x cheaper per call."""
+CALIBRATION_JUDGE = "openai/gpt-5.6-terra"
+"""Re-scores a calibration subset only. JUDGE is kept for an eval if it agrees with this
+judge and with hand labels at kappa >= JUDGE_MIN_KAPPA; otherwise that eval is re-scored
+with CALIBRATION_JUDGE."""
+CALIBRATION_ITEMS = 300
+JUDGE_MIN_KAPPA = 0.6
+
 # ---- inoculation -------------------------------------------------------------
 
 INOCULATION_BANK = CONFIG_DIR / "inoculation_prompts.json"
