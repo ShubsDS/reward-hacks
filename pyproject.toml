@@ -1,0 +1,24 @@
+[project]
+name = "rhinoc"
+version = "0.1.0"
+description = "Does inoculation prompting cure the reward seeker? Experiment code for a scoped RL reward-hacking study."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+# The core package (costs, metrics, run definitions, NL grader filter) is stdlib-only so its
+# tests run without the heavy pipeline. The Daniels pipeline and Tinker are installed into the
+# same venv by scripts/setup_pipeline.sh.
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rhinoc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
