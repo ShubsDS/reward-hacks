@@ -3,8 +3,8 @@
 A 4-week, one-person, **under-$1k** project testing whether the field's main fix for reward-hacking-induced misalignment also fixes the more common failure, and whether the *wording* of that fix matters.
 
 > **Status:** planned, not started. Last updated 2026-10-11 (scoped-down version).
-> **Budget:** ≈ $800 total (cap $1,000) · ~40 hands-on hours over 4 weeks.
-> **First spend:** ≈ $70, self-funded, in week 1. The rest is unlocked only if week 1 works (BlueDot rapid grant).
+> **Budget:** ≈ $660 total (cap $1,000) · ~40 hands-on hours over 4 weeks.
+> **First spend:** ≈ $62, self-funded, in week 1. The rest is unlocked only if week 1 works (BlueDot rapid grant).
 > **Hard deadline:** the DeepSeek-V3.1 positive control must launch by **Oct 18** (Tinker retires the model Oct 23).
 
 ---
@@ -34,9 +34,9 @@ flowchart LR
 ```mermaid
 flowchart TD
     S0["<b>Stage 0 · Free setup</b><br/>Port pipeline · smoke-test on a tiny model<br/>build reward-seeking evals · ~$5"]
-    S0 --> S1["<b>Stage 1 · Gate (week 1)</b><br/>Can DeepSeek-V4.1-Flash become<br/>broadly misaligned at all? · ~$70, self-funded"]
+    S0 --> S1["<b>Stage 1 · Gate (week 1)</b><br/>Can DeepSeek-V4.1-Flash become<br/>broadly misaligned at all? · ~$62, self-funded"]
     S1 --> D{"Pipeline works and<br/>cost per step OK?"}
-    D -->|yes| S2["<b>Stage 2 · Main experiment (weeks 2–3)</b><br/>3 RL runs on the same hackable environments:<br/>plain · 'goal = grader' inoculation · 'helping the developers' inoculation<br/>+ 1 reserve run if funded · ~$570–730"]
+    D -->|yes| S2["<b>Stage 2 · Main experiment (weeks 2–3)</b><br/>3 RL runs on the same hackable environments:<br/>plain · 'goal = grader' inoculation · 'helping the developers' inoculation<br/>+ 1 reserve run if funded · ~$436–600"]
     D -->|no| FB["<b>Fallback</b><br/>Audit released AISI checkpoints<br/>on a rented GPU · ~$100"]
     S2 --> W4["<b>Week 4 · Write-up</b><br/>LessWrong/AF post + released evals"]
     FB --> W4
@@ -48,10 +48,11 @@ flowchart TD
 |---|---|
 | **Duration** | 4 weeks (Oct 12 – Nov 8, 2026) |
 | **Hands-on time** | ~40 h (12 / 10 / 10 / 8 per week) |
-| **Total compute** | ≈ $800, cap $1,000. Minimum viable version ≈ $640 |
+| **Total compute** | ≈ $660, cap $1,000. Minimum viable version ≈ $500 |
 | **Platform** | [Tinker](https://tinker-docs.thinkingmachines.ai/), pay as you go |
 | **Model** | DeepSeek-V4.1-Flash (cheapest large model on Tinker) |
 | **Codebase** | [Daniels et al. RL pipeline](https://github.com/oliveradk/iter-dpo-reward-hacking-generalization) |
+| **Judges** | `gpt-5.6-luna` for all judged evals (≈ $12), `gpt-5.6-terra` on a calibration subset (≈ $3) |
 | **Training runs** | 6 small SFT runs (gate) + 3–4 RL runs × 48 steps |
 | **Local machine** | 16 GB laptop is enough: it only orchestrates; models run remotely |
 
