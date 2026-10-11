@@ -1,4 +1,4 @@
-# 06 · Risks, open questions, and fact check
+# 06 · Risks, cuts, and fact check
 
 [← Back to README](README.md) · [← 05 Outcomes and impact](05-outcomes-and-impact.md)
 
@@ -6,72 +6,60 @@
 
 | Risk | Chance | What we do about it |
 |---|---|---|
-| DeepSeek-V3.1 retires before the anchor runs | 15% | Launch on day 1. G0 doesn't block anything; the gate-model SFT pairs carry the inference. |
-| None of the candidate models can become misaligned | 29–35% | Kimi-K2.6 fallback, then Branch B. Q1 still gets answered. |
-| Qwen3.5 leaks `<think>` tokens or ignores the reasoning format | 25% | Format penalty plus a renderer fix; otherwise switch to V4.1-Flash. |
-| Cost per step or throughput worse than estimated | 25% | Gate G2 tiers, spend guard, Branch C. |
-| Inoculation changes hacking speed, so no fair comparison pairs exist | 30% | Checkpoints every 8 steps, dose-curve fallback, "suggestive" label (G5). |
-| New reward-seeking evals show no signal, or are maxed out on the base model | 20% | Prompted controls; drop failing channels *before* seeing RL results. |
-| Misalignment appears in only 1–2 evals | 50% if it appears | Report each eval separately; scope claims to the evals that move. |
-| Single-seed noise | High | R6 adds a seed where the main claim lands; the two domains replicate Q1; claims labeled "suggestive". |
-| Researcher hours slip past 50 | 30% | Cut order in [03](03-timeline-and-budget.md); the OLMo validation is the first large cut. |
-| Dual use: T1 measures harmful compliance for a grader | Low | Low-severity categories only (no CBRN); trained LoRAs shared on request, not published. |
+| **Hacking doesn't emerge with 64 rollouts/step** (Daniels used 256) | 30% | Step-24 gate: extend to 72 steps; never add hints. If still absent, report it as a finding about RL strength. |
+| Real cost per step is higher than $1.35 | 30% | Smoke test before spending; G0 tiers; $100/run budget includes 50% contingency |
+| The Daniels pipeline doesn't port cleanly to Flash (renderer, reasoning format) | 25% | Cap porting at 10 h, then switch to the Fallback audit |
+| Flash can't become broadly misaligned | 40% | Doesn't block Q1/Q2, which measure reward seeking. Misalignment results are reported but not interpreted. |
+| V3.1 retires before the anchor runs | 15% | Launch by Oct 18; the Flash insecure-vs-secure pair still checks the pipeline, less cleanly |
+| R1 and R2 differ in more than one way: R2 also gives a reason, asks for hacking outright, and is longer | Certain | A difference shows that **wording matters**, not exactly which phrase does it. Using both published texts verbatim keeps the result comparable to AISI's and MacDiarmid's. Isolating the exact phrase is a follow-up. |
+| Inoculation changes hacking speed, so no fair comparison pairs exist | 30% | Checkpoints every 8 steps; dose-curve fallback; "suggestive" label |
+| New reward-seeking evals show no signal | 20% | Prompted controls in E1; drop failing channels before seeing RL results |
+| Single-seed noise | High | Reserve run replicates the headline; "suggestive" language otherwise |
+| BlueDot grant smaller than needed, or late | 40% | Stage 2 has a cheaper R0+R1-only version (≈ $380). The Stage 1 gate is self-funded. |
+| Laptop sleeps mid-run | Medium | `caffeinate`, plugged in; runs resume automatically |
+| Dual use: T1 measures harmful compliance for a grader | Low | Low-severity categories only (no CBRN); trained LoRAs shared on request, not published |
 
 ---
 
-## Open design decision: which question leads?
+## What was cut and why
 
-The current plan leads with the **mitigation question** (Q1: does inoculation fix the reward seeker?). The original memo asked a different question: **what tips RL from producing a reward seeker into producing broad misalignment?** In the current design that question is secondary, with only about a 26% chance that any RL run shows misalignment.
-
-| | Mitigation-first (current) | Tipping-first (alternative) |
+| Cut from the earlier $2.6k plan | Why | Saved |
 |---|---|---|
-| Lead question | Does inoculation fix the common failure? | Which conditions make RLVR produce broad misalignment? |
-| Core design | {code, NL} × {inoculation, none} | {base, instruct start} × {with, without SFT warm-up}, with inoculation as one extra arm |
-| Chance of seeing misalignment somewhere | ~26% | Higher, since each cell adds a known tipping ingredient |
-| Closeness to what labs actually run | High (unprimed, instruct model) | Lower (deliberately adds risk factors) |
-| Who acts on it | Lab training teams, pre-deployment testers | Researchers, funders; labs indirectly |
+| **Code vs natural-language comparison** (separate 2×2) | Partly preempted: Hacker-Opus's environments already included non-coding tasks and showed no misalignment | ~$700 |
+| **Qwen3.5-397B** | About 1.6× Flash's cost per token. Its credibility edge doesn't justify the price at this budget. | ~$500 |
+| **128 → 64 rollouts per step; 64 → 48 steps** | Budget. Hacking may emerge more slowly; G3 catches this. | ~$500 |
+| **Two misalignment evals** (frame-colleague, alignment-faking scorer) | Expensive judges; AISI found most signal in monitor disruption and exfiltration | ~$150 |
+| **Mandatory OLMo-32B validation (E1)** | Needs a rented GPU; prompted controls cover most of its purpose. Now optional. | ~$100 |
+| **Tinker safety grant application** | Up to $50k, but credits take up to 30 days to arrive, too slow for this timeline | n/a |
 
-**Recommendation: keep mitigation-first.** You can recover much of the tipping question by adding one of the optional arms below.
+**Added:** the "helping the developers" inoculation arm (R2, AISI/MacDiarmid `please_hack` verbatim). The repo's standard inoculation text literally instructs grader-maximization, so without this arm any "inoculation keeps reward seeking" result is open to the objection "of course, you told it to."
 
-## Optional add-on arms
+## If more money arrives later
 
-Both arms come from the levers analysis in [`notes/rlvr-vs-sft-em-levers.md`](../external-research/notes/rlvr-vs-sft-em-levers.md). The costs are estimates.
+In order of value:
+1. Second seeds for all three runs (~$300)
+2. Natural-language-only vs code-only versions of R0/R1 (the dropped Q2 from the earlier plan; ~$400)
+3. An SFT warm-up arm: does a small off-policy seed let RL amplify broad misalignment? (~$150)
+4. Base vs instruct starting point (Qwen3.5-9B pair), testing Anthropic's explanation for Hacker-Opus (~$300)
+5. Repeat on Qwen3.5-397B (~$1,000)
 
-| Arm | What | Why | Extra cost | Extra hours |
-|---|---|---|---|---|
-| **A · SFT warm-up** | A short School-of-Reward-Hacks SFT, then the same GRPO as R3 | Tests whether a small off-policy "seed" lets RL amplify broad misalignment (Jørgenvåg needed a 100-example warm-up; Countdown-Code saw 1% contamination amplified) | ≈ $410 (397B) / $310 (Flash) | +3 |
-| **B · Base vs instruct start** | The same coding GRPO from Qwen3.5-9B-Base and Qwen3.5-9B (instruct) | Tests Anthropic's own explanation for Hacker-Opus: an aligned starting point has nothing misaligned to amplify. The Hacker-Opus post names this as future work. | ≈ $250–350 | +6 |
-
-**Budget fit:**
-- **Arm A:** fits on the V4.1-Flash path (≈ $2.4k total). On the 397B path it hits the $3k cap, so run it *instead of* R6.
-- **Arm B:** the weak point is scale. 9B models rarely show misalignment, so a null there is hard to interpret. Treat it as a next sprint unless week 1 finishes early.
+The full earlier plan is at git commit `9058e25`. The levers analysis is in [`notes/rlvr-vs-sft-em-levers.md`](../external-research/notes/rlvr-vs-sft-em-levers.md).
 
 ---
 
 ## Fact check status
 
-Facts the plan depends on, and how sure we are of each.
-
 | Claim | Status |
 |---|---|
-| Tinker model lineup, prices, and the V3.1 retirement date (Oct 23) | ✅ Checked on Tinker's pricing and deprecation pages, Oct 9 |
-| Hacker-Opus numbers (40% hacking, 0.0% misalignment evals, 41% tampering, no inoculation) | ✅ Checked on the [primary page](https://alignment.anthropic.com/2026/reward-seeker/) |
-| Daniels repo has Tinker GRPO, inoculation configs, and the eval battery | ✅ Checked via GitHub |
-| AISI checkpoints listed in E1 exist | ✅ Checked via Hugging Face API |
-| Redwood GPT-OSS LoRAs exist (Tinker-internal format) | ✅ Checked |
-| GPT-OSS shows no misalignment from insecure-code SFT | ☑️ Checked by research agents; not re-checked |
-| 459 of 586 NL tasks are scored by code only | ☑️ Checked by research agents; not re-checked |
-| No published study of inoculation × reward seeking | ⚠️ Search found none. Absence is not proof |
-| Daniels README claim of scheming after 32 GRPO steps on Qwen3-235B | ⚠️ Unpublished, unverified |
-| Sep 2026 papers (Jose & Stastny, Daniels) | ⚠️ Partly summarized from abstracts and repos |
-| RL cost per step and judge cost per checkpoint | ❓ Estimates, measured in week 1 |
-| Whether Qwen3.5-397B or V4.1-Flash can become misaligned | ❓ Unknown; this is what the gate measures |
-
-## What to do later
-
-From the ideation rounds, worth a follow-up sprint once this project produces a working RL hacker on a large model:
-
-1. **A "report the bug" reward channel.** Reward the model for disclosing an exploit instead of using it. This was the most novel lab-deployable mitigation in the set.
-2. **Sweep detector recall when penalizing detected hacks.** Does penalizing detected hacks teach hiding, and at what detector recall? Labs are making this decision now.
+| Tinker prices for Flash and V3.1; V3.1 retires Oct 23 | ✅ Checked on Tinker's pricing and deprecation pages, Oct 9 |
+| Exact inoculation texts (`general_grader_optimization_ok`, `please_hack`) | ✅ Read directly from the Daniels repo and AISI `rl-envs/src/rh_envs/prompts.py` |
+| Daniels repo: Tinker GRPO, environment mix, inoculation configs, eval battery | ✅ Read directly |
+| Hacker-Opus numbers (0.0% misalignment evals, 41% tampering, no inoculation) | ✅ Checked on the [primary page](https://alignment.anthropic.com/2026/reward-seeker/) |
+| 459 of 586 NL tasks are scored by code only | ☑️ Checked by research agents; to re-verify in week 1 |
+| The Daniels pipeline works with DeepSeek-V4.1-Flash | ❓ Unknown; the repo pins a forked tinker-cookbook and targets Qwen. Week-1 smoke test. |
+| Real cost per step at 64 rollouts | ❓ Estimate; week-1 smoke test |
+| Flash can become broadly misaligned | ❓ Unknown; the E0 gate |
+| No published study of inoculation × reward seeking, or of inoculation wording × reward seeking | ⚠️ Search found none. Absence is not proof |
+| BlueDot rapid grants: typically a few hundred dollars for compute, up to $10k, ~5 working days | ✅ [BlueDot rapid grants page](https://bluedot.org/grants/rapid) |
 
 [← Back to README](README.md)
