@@ -51,10 +51,10 @@ quadrantChart
 |---|---|
 | A–C, E weighted | 0.20 × 6.5 + 0.30 × 6.0 + 0.15 × 4.0 + 0.35 × 1.5 ≈ **4.2** |
 | Trigger add-on and side results | ≈ +0.3 |
-| **This plan (≈ $800)** | **≈ 4.5** |
+| **This plan (≈ $660)** | **≈ 4.5** |
 | Earlier full plan (≈ $2,600, judge's estimate) | ≈ 4.65 |
 
-These numbers are my estimates, made on the same scale the ideation judge used. The scoped plan keeps nearly all the expected impact at under a third of the cost. It drops the code-vs-NL comparison, which Hacker-Opus partly preempts, and the expensive 397B model. It adds the wording split, which no one has tested and which labs can act on immediately.
+These numbers are my estimates, made on the same scale the ideation judge used. The scoped plan keeps nearly all the expected impact at about a quarter of the cost. It drops the code-vs-NL comparison, which Hacker-Opus partly preempts, and the expensive 397B model. It adds the wording split, which no one has tested and which labs can act on immediately.
 
 ## The single most valuable result
 
