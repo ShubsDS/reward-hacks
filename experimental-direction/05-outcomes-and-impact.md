@@ -2,7 +2,7 @@
 
 [← Back to README](README.md) · [← 04 Decision gates](04-decision-gates.md)
 
-The project was chosen to **maximize expected impact summed over all possible results**, not just the result we hope for. This page lists every outcome, what it would mean, and who would act on it.
+The design was chosen so that **every likely result changes something**, not just the result we hope for.
 
 ## Impact scale
 
@@ -13,61 +13,53 @@ The project was chosen to **maximize expected impact summed over all possible re
 | 3–5 | An academic research direction shifts |
 | 1–2 | Nothing changes |
 
-Results on open models with 1–2 seeds are capped at 7.5.
+Results on one open model with 1–2 seeds are capped at about 7.
 
-## Q1 · What inoculation does to the reward seeker
+## The main outcomes
 
-| Outcome | Chance* | What it means | Who acts, and how | Impact |
-|---|---|---|---|---|
-| **Leaves reward seeking intact** | 37% | Inoculation fixes the rare failure and leaves the common one | **Lab training teams** using MacDiarmid-style inoculation pair it with grader and monitor hardening. **AISI / CAISI testers** make grader-based evals standard for any model that hacked during training. Answers Apollo's open problem #3. | **6.0** |
-| **Removes both** | 20% | Reward seeking and misalignment share a cause: how the model reads its own hacking | Strengthens the case for blanket inoculation. Open-weight developers get a cheap default. | 4.0 |
-| **Plants a trigger** | 10% | The inoculation line or a paraphrase brings reward seeking or misalignment back at test time | Labs audit inoculation wording for phrases a user could reach. Evaluators add trigger sweeps. | 4.5 |
-| **No clear effect** | 33% | Too noisy to tell | Nothing changes | 1.5 |
-
-## Q2 · Which kind of hack tips the model into misalignment
-
-| Outcome | Chance* | What it means | Who acts, and how | Impact |
-|---|---|---|---|---|
-| **NL → misaligned, code → reward seeker only** | 14% | Hacks that short-change a person are more dangerous than test-gaming | **Environment-hardening owners** prioritize metric- and rubric-graded NL environments. The "no misalignment" lesson from Hacker-Opus is scoped to coding. Discounted because Hacker-Opus already included some non-coding environments. | 5.5 |
-| **Both → misaligned** | 8% | Unprimed hacking *does* cause misalignment in an open frontier-scale model | Challenges generalizing from Hacker-Opus. All residual hackability becomes an alignment issue; hardening and monitoring budgets rise. | 6.0 |
-| **Neither → misaligned** | 37% | Interpretable *because* the gate passed: the model *can* become misaligned, just not this way | If SFT on the same model did cause misalignment, then off-policy test organisms overstate RL risk. **Funders** shift money from SFT-proxy studies to reward-seeker work. | 4.5 |
-| **Code only → misaligned** | 4% | Reverses School of Reward Hacks | Labs flag hacking on forced-impossible tasks | 4.5 |
-| **Ambiguous** | 37% | Single-seed noise | Pipeline and priors only | 1.5 |
-
-\* Conditional on the week-1 gate passing.
-
-## The full picture across branches
+The two primary questions combine into four readable outcomes, plus noise.
 
 ```mermaid
-flowchart LR
-    S(["Start"]) --> P{"Week 1"}
-    P -->|"54% · gate passes<br/>and runs complete"| M["<b>Main branch</b><br/>Q1 + Q2 + susceptibility table<br/>avg impact ≈ 5.6"]
-    P -->|"29% · gate fails"| B["<b>Branch B</b><br/>Q1 with 2 seeds + table<br/>avg impact ≈ 4.2"]
-    P -->|"10% · Tinker broken"| C["<b>Branch C</b><br/>Audit of released models<br/>impact ≈ 3.3"]
-    P -->|"7% · later failure"| F["Partial results<br/>impact ≈ 1.5"]
-    style M fill:#d4edda,stroke:#3c763d
-    style B fill:#fff3cd,stroke:#b8860b
-    style C fill:#f8d7da,stroke:#a94442
+quadrantChart
+    title Reward seeking after training, relative to plain RL
+    x-axis "Goal-instruction (R1) cures RS" --> "R1 keeps or raises RS"
+    y-axis "Helping-devs (R2) same as R1" --> "Helping-devs (R2) lower than R1"
+    quadrant-1 "Wording matters (A)"
+    quadrant-2 "Both cure it (C)"
+    quadrant-3 "Both cure it (C)"
+    quadrant-4 "Inoculation never helps (B)"
 ```
 
-Branch averages are approximate, derived from the judge's cell-level table in [`judge_ruling_AGENDA.md`](../external-research/judge_ruling_AGENDA.md) §3.
+| | Outcome | Chance* | What it means | Who acts, and how | Impact |
+|---|---|---|---|---|---|
+| **A** | **"Goal = grader" keeps reward seeking; "helping the developers" reduces it** | 20% | The deployed wording trains reward seeking as a side effect. Sanctioning the hack as a favor to the developers, without naming the grader as the goal, keeps the protection without the side effect. | **Lab training teams** switch inoculation wording, a free change. **Apollo / Redwood** get a mechanism for open problem #3. | **6.5** |
+| **B** | **Both wordings keep reward seeking** | 30% | Inoculation of any wording fixes only the rare failure | **Lab training teams** must pair inoculation with grader and monitor hardening. **AISI / CAISI testers** add grader-based evals for any model that hacked during training. | **6.0** |
+| **C** | **Both wordings reduce reward seeking** | 15% | Reward seeking and misalignment share a cause: how the model reads its own hacking. Inoculation is better than feared. | Strengthens the case for blanket inoculation; open-weight developers get a cheap default | 4.0 |
+| **D** | **Inoculation line acts as a trigger** (add-on to A–C) | 45% | Showing the line or a paraphrase at test time brings reward seeking back | Labs audit inoculation wording for phrases a user could reach; evaluators add trigger sweeps | +0.5 |
+| **E** | **Noisy / unclear** | 35% | Single seed too weak to call | Released evals, gate result, pipeline | 1.5 |
 
-## Expected impact compared
+\* Rough priors. A–C and E sum to 100%. D can co-occur with any of them.
 
-| Plan | Its advocate's estimate | Judge's skeptical estimate |
-|---|---|---|
-| Training only (397B, 5 runs, no gate) | 5.3 | 4.3 |
-| Audit only (released checkpoints, no training) | 4.6 | 3.6 |
-| **This hybrid plan** | n/a | **≈ 4.65** |
+**Side results that come regardless of the outcome:**
+- **Gate result:** whether DeepSeek-V4.1-Flash can become broadly misaligned. This is useful because the field's two known-susceptible open models are being retired.
+- **H6:** an open replication of Hacker-Opus's eval gap: grader-based evals catch the hacker where standard misalignment evals don't.
+- **Released T1/T2 eval tasks** that others can run on their own organisms.
 
-**Why the hybrid wins:** even if the gate fails (Branch B), the project still answers Q1 in the realistic unprimed setting with 2 seeds. The audit-only plan can only answer Q1 on primed, single-seed checkpoints with unequal training lengths. The hybrid stayed ahead in every sensitivity check:
-- gate pass rate 40% → 4.4
-- Tinker failure rate 25% → 4.3
+## Expected impact
 
-## Most valuable single result
+| | |
+|---|---|
+| A–C, E weighted | 0.20 × 6.5 + 0.30 × 6.0 + 0.15 × 4.0 + 0.35 × 1.5 ≈ **4.2** |
+| Trigger add-on and side results | ≈ +0.3 |
+| **This plan (≈ $800)** | **≈ 4.5** |
+| Earlier full plan (≈ $2,600, judge's estimate) | ≈ 4.65 |
 
-**"Inoculation removes the misaligned persona but leaves a reward seeker that generalizes to new grader channels, shown in an unprimed run on a model verified to be misalignment-susceptible."**
+These numbers are my estimates, made on the same scale the ideation judge used. The scoped plan keeps nearly all the expected impact at under a third of the cost. It drops the code-vs-NL comparison, which Hacker-Opus partly preempts, and the expensive 397B model. It adds the wording split, which no one has tested and which labs can act on immediately.
 
-That would be the first open evidence that labs are mitigating the rare failure while the common one goes unaddressed.
+## The single most valuable result
+
+**"The standard inoculation wording ('your only goal is the grader') leaves, or even strengthens, a reward seeker that generalizes to new grader channels, while framing hacking as a favor to the developers does not."**
+
+That gives labs a concrete, zero-cost change to make.
 
 Next: [06 · Risks and open questions →](06-risks-and-open-questions.md)
