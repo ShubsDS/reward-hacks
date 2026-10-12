@@ -87,3 +87,31 @@ def g0_tier(per_step: float) -> str:
     if per_step <= 3.0:
         return "cut to 40 steps or 3,072 max tokens"
     return "fallback: audit released checkpoints"
+
+
+def measured_step_costs(run_dir: Path, prices: Prices) -> list[tuple[int, StepCost]]:
+    """(iteration, cost) for every finished GRPO step of an RL run, priced from the token
+    counts in `tinker_log/iteration_*/train_rollout_summaries.jsonl`.
+
+    The summaries hold every rollout, including constant-reward groups that are dropped
+    before training, so `train` is an upper bound. A step counts as finished once its file
+    has `groups_per_batch * group_size` rollouts.
+    """
+    config = json.loads((Path(run_dir) / "config.json").read_text())
+    groups, group_size = config["groups_per_batch"], config["group_size"]
+    out = []
+    for path in sorted((Path(run_dir) / "tinker_log").glob("iteration_*/train_rollout_summaries.jsonl")):
+        prompt, sampled = [], []
+        for line in path.read_text().splitlines():
+            try:
+                step = json.loads(line)["steps"][0]
+            except (json.JSONDecodeError, KeyError, IndexError):
+                continue  # a line still being written
+            prompt.append(step["ob_len"])
+            sampled.append(step["ac_len"])
+        if len(sampled) < groups * group_size:
+            continue
+        iteration = int(path.parent.name.removeprefix("iteration_"))
+        cost = rl_step_cost(prices, groups, group_size, sum(prompt) / len(prompt), sum(sampled) / len(sampled))
+        out.append((iteration, cost))
+    return out

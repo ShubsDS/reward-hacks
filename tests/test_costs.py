@@ -42,3 +42,25 @@ def test_spend_guard():
 @pytest.mark.parametrize("per_step,tier", [(1.35, "as planned"), (2.5, "cut"), (3.5, "fallback")])
 def test_g0_tiers(per_step, tier):
     assert g0_tier(per_step).startswith(tier)
+
+
+def _fake_run(tmp_path, steps, groups=2, group_size=2):
+    import json
+
+    (tmp_path / "config.json").write_text(json.dumps({"groups_per_batch": groups, "group_size": group_size}))
+    for i, (ob, ac, n) in enumerate(steps):
+        d = tmp_path / "tinker_log" / f"iteration_{i:06d}"
+        d.mkdir(parents=True)
+        rows = [json.dumps({"steps": [{"ob_len": ob, "ac_len": ac}]}) for _ in range(n)]
+        (d / "train_rollout_summaries.jsonl").write_text("\n".join(rows) + "\n")
+    return tmp_path
+
+
+def test_measured_step_costs_prices_finished_steps_only(tmp_path):
+    from rhinoc.costs import measured_step_costs
+
+    run = _fake_run(tmp_path, [(200, 1000, 4), (200, 3000, 4), (200, 3000, 3)])  # last step unfinished
+    steps = measured_step_costs(run, FLASH)
+    assert [i for i, _ in steps] == [0, 1]
+    assert steps[0][1].total == pytest.approx(rl_step_cost(FLASH, 2, 2, 200, 1000).total)
+    assert steps[1][1].total > 2.5 * steps[0][1].total
