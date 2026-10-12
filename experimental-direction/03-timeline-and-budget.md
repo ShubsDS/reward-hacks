@@ -8,7 +8,7 @@
 |---|---|---|
 | Calendar time | 2–4 weeks | 4 weeks; RL runs go unattended |
 | Researcher time | ~10–15 h/week, one person | ~40 h total: 16 / 6 / 10 / 8 |
-| Money | ≤ $1,000 total; ≈ $70 out of pocket to start | ≈ $765 planned (≈ $925 if G3 triggers), spent in stages; ≈ $39 spent before anything was proven |
+| Money | ≤ $1,000 total; ≈ $70 out of pocket to start | ≈ $770 planned (≈ $910 if G3 triggers), spent in stages; ≈ $39 spent before anything was proven |
 | Hardware | 16 GB laptop | The laptop only orchestrates; all models run on Tinker |
 
 ## Timeline
@@ -79,7 +79,7 @@ The runs start at the end of week 1; their cost is counted here. The runs and th
 | Final checkpoints: battery, misalignment evals, trigger condition, "grader"-vocabulary T1/T2 | 2 |
 | Read ~10 training transcripts per arm for sanity | 1 |
 
-### Week 3 · Analyze (Oct 26 – Nov 1) · **10 h** · spend ≈ $10 (+$160 if G3 triggered)
+### Week 3 · Analyze (Oct 26 – Nov 1) · **10 h** · spend ≈ $10 (+$140 if G3 triggered)
 
 | Task | Hours |
 |---|---|
@@ -117,15 +117,15 @@ After the tag, every cut is a protocol deviation and goes in the deviations log 
 **RL cost per step (measured):** the week-1 smoke tests put Flash at **≈ $1.16/step** at 64 rollouts, in chat mode with a 6,144-token cap. The launcher's estimate, 350 prompt + 1,900 sampled tokens per rollout, reproduces it:
 - Sampling: 122k tokens × $3.60/M = $0.44
 - Training: 144k tokens × $4.98/M = $0.72
-- **≈ $1.16/step, or ≈ $56 per 48-step run.** The in-training eval cells (all 200 `impossible_apps` problems at every checkpoint, plus the others) add ≈ $32 per run.
+- **≈ $1.16/step, or ≈ $56 per 48-step run.** The in-training eval cells (all 200 `impossible_apps` problems at every checkpoint, plus the others; no line-on cells) add ≈ $20 per run.
 
-**Eval cost is mostly sampling, not judging.** The judge is `gpt-5.6-luna` at about $0.001 per call. `gpt-5.6-terra` re-scores a 150-item calibration subset per judged eval (≈ $10 in all). Using Terra for everything, the Daniels default, would cost about 9× more per call. See [02 · Judges](02-experiments.md#judges).
+**Eval cost is mostly sampling, not judging.** The judge is `gpt-5.6-luna` at about $0.001 per call. `gpt-5.6-terra` re-scores a 150-item calibration subset per judged eval (≈ $5 in all). Using Terra for everything, the Daniels default, would cost about 9× more per call. See [02 · Judges](02-experiments.md#judges).
 
 ### Staged costs
 
 ```mermaid
 flowchart LR
-    A["<b>Stage 0–1</b><br/>Setup + gate<br/><b>≈ $39, spent</b><br/><i>you paid</i>"] --> B["<b>Stage 2</b><br/>E1 probe + six runs<br/>+ evals<br/><b>≈ $725</b><br/><i>grant or you</i>"] --> C["<b>Stage 3</b><br/>G3 extension<br/>to 64 steps<br/><b>≈ $160</b><br/><i>only if triggered</i>"]
+    A["<b>Stage 0–1</b><br/>Setup + gate<br/><b>≈ $39, spent</b><br/><i>you paid</i>"] --> B["<b>Stage 2</b><br/>E1 probe + six runs<br/>+ evals<br/><b>≈ $730</b><br/><i>grant or you</i>"] --> C["<b>Stage 3</b><br/>G3 extension<br/>to 64 steps<br/><b>≈ $140</b><br/><i>only if triggered</i>"]
     style A fill:#d4edda,stroke:#3c763d
     style B fill:#fff3cd,stroke:#b8860b
     style C fill:#f0f0f0,stroke:#888
@@ -134,22 +134,22 @@ flowchart LR
 | Stage | Item | Cost |
 |---|---|---|
 | **0–1** | Smoke tests, gate SFTs (6 Flash, 2 of them exploratory, + 2 V3.1), gate evals, Terra check: ≈ $36 Tinker + ≈ $3 OpenAI | ≈ $39 (spent) |
-| **2** | E1 probe on base Flash (D3) | ≈ $35 |
-| **2** | 6 RL runs × (48 steps ≈ $56 + in-training evals ≈ $32) | ≈ $530 |
-| **2** | Reward-seeking battery: 6 runs × 3 checkpoints, plus base | ≈ $90 |
-| **2** | Final checkpoints: misalignment evals plus trigger condition | ≈ $60 |
-| **2** | Judge calibration (Terra) | ≈ $10 |
-| | **Stage 2 subtotal** | **≈ $725** |
-| | **Planned total** | **≈ $765** |
-| **3** | G3 extension to 64 steps, all six runs, only if triggered | ≈ +$160 |
-| | **Worst case** | **≈ $925** (cap $1,000) |
+| **2** | E1 probe on base Flash (D3): 8 conditions × 11 cells | ≈ $50 |
+| **2** | 6 RL runs × (48 steps ≈ $56 + in-training evals ≈ $20) | ≈ $456 |
+| **2** | Reward-seeking battery at steps 16 and 32: 12 checkpoints | ≈ $78 |
+| **2** | Final checkpoints: battery, grader-vocabulary variant, misalignment evals, trigger condition; plus base misalignment evals | ≈ $140 |
+| **2** | Judge calibration (Terra) | ≈ $5 |
+| | **Stage 2 subtotal** | **≈ $730** |
+| | **Planned total** | **≈ $770** |
+| **3** | G3 extension to 64 steps, all six runs, only if triggered | ≈ +$140 |
+| | **Worst case** | **≈ $910** (cap $1,000) |
 
 ### Guardrails
 
-- **Spend guard:** `scripts/watch_spend.py` runs next to every RL run with `--estimate 1.16`. It stops the run when the trailing 3-step mean exceeds 1.5× the estimate (≈ $1.74/step), or when the run's total passes its cap: $100 at 48 steps, $130 at 64 steps.
+- **Spend guard:** `scripts/watch_spend.py` runs next to every RL run with `--estimate 1.16 --eval-cost 2.5`. It stops the run when the trailing 3-step mean exceeds 1.5× the estimate (≈ $1.74/step), or when the run's total passes its cap: $90 at 48 steps, $115 at 64 steps.
 - **No early stopping on outcomes.** A crashed run resumes from its last checkpoint.
 - **Stage gates:** the E1 probe runs only after the D1 smoke and the D2 plumbing check are clean. The six runs start only after the tag, which needs D1–D5 done. Stage 3 starts only if G3 triggers at step 24.
-- **Headroom:** ≈ $235 under the $1,000 cap, or ≈ $75 if G3 triggers. It covers Terra re-scoring for any eval whose judge calibration fails, and crash re-runs.
+- **Headroom:** ≈ $230 under the $1,000 cap, or ≈ $90 if G3 triggers. It covers Terra re-scoring for any eval whose judge calibration fails, and crash re-runs.
 - **If the BlueDot grant is smaller than asked:** the tag commits all six runs, both seeds of every arm. Any cut (fewer runs or fewer checkpoints) has to be decided before the tag. After it, a cut is a logged deviation.
 
 ### Accounts and tools
