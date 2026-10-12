@@ -53,7 +53,7 @@
 
 ## If more money arrives later
 
-The plan leaves ≈ $235 under the $1,000 cap, or ≈ $75 if G3 triggers. Each extra run costs about $110 with its evals. In order of value:
+The plan leaves ≈ $230 under the $1,000 cap, or ≈ $90 if G3 triggers. Each extra run costs about $110 with its evals. In order of value:
 1. A third seed for all three arms (~$330)
 2. Split R2: permission without the blame-shifting sentence (~$220 for two seeds)
 3. An unhinted arm (no frame or hints), closer to Hacker-Opus-style unprimed RL (~$220 for two seeds)
