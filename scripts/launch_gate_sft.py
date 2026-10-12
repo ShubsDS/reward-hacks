@@ -43,9 +43,9 @@ def main() -> None:
     log_path = REPO_ROOT / "runs" / "gate" / run.name
 
     tokens = estimate_tokens(data_path)
-    cost = sft_cost(Prices.for_model(run.model), tokens, GATE_SFT["num_epochs"])
+    cost = sft_cost(Prices.for_model(run.model), tokens, run.epochs)
     print(f"{run.name}: {run.model} ({run.renderer}) on {data_path.name}, role: {run.role}")
-    print(f"  hyperparameters: {GATE_SFT}")
+    print(f"  hyperparameters: {GATE_SFT}, epochs {run.epochs}")
     print(f"  ~{tokens:,.0f} tokens/epoch, estimated ${cost:.2f}")
     print(f"  log path: {log_path}")
     if not args.launch:
@@ -79,7 +79,7 @@ def main() -> None:
         "dataset_builder": FromConversationFileBuilder(common_config=common, file_path=str(data_path)),
         "learning_rate": GATE_SFT["learning_rate"],
         "lr_schedule": "linear",
-        "num_epochs": GATE_SFT["num_epochs"],
+        "num_epochs": run.epochs,
         "lora_rank": GATE_SFT["lora_rank"],
         "eval_every": 0,
     }).make()
