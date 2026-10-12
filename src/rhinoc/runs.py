@@ -119,16 +119,17 @@ RL_EVAL_SET: dict = dict(
     n_apps=200,
     n_sg=64,
     n_ifeval=128,
-    inoculation="training",
+    inoculation=None,
     toy="explicit_odd",
     toy_repeats=10,
     n_monitor=64,
     n_exfil=0,
     mis_max_tokens=SHARED_RL["max_tokens"],
 )
-"""`StandardEvalSet` arguments for the in-training checkpoint evals. All 200 impossible_apps
-problems, because the line-off `apps` hack rate is the matching variable (onset, G3, G5).
-`apps_inoc` / `sg_inoc` carry the run's own line. Exfil is left to the final battery: it
+"""`StandardEvalSet` arguments for the in-training checkpoint evals (~$2.5 per checkpoint). All
+200 impossible_apps problems, because the line-off `apps` hack rate is the matching variable
+(onset, G3, G5). No `apps_inoc` / `sg_inoc` cells: the trigger test (H5) is measured by the
+final battery, and these would add ~$65 across the runs. Exfil is left to the final battery: it
 needs ROT13 decoding, which is why AISI dropped it."""
 
 SMOKE_EVAL_SET: dict = dict(
