@@ -9,9 +9,12 @@ import pytest
 
 from rhinoc.patches import (
     TRAINING_DATASETS,
+    TOY_EVEN_GRADER,
     check_dataset_revisions,
     register_inoculation_bank,
+    register_toy_even_grader,
     restrict_nl_training_samples,
+    sandbox_profile,
     scrub_code_execution_env,
 )
 from rhinoc.runs import INOCULATION_BANK
@@ -71,8 +74,10 @@ def test_scrub_hides_secrets_from_policy_code(monkeypatch):
     monkeypatch.setenv("PATH", "/venv/bin:/usr/bin")
     mod, calls = fake_language_envs()
     real_timeout = mod.subprocess.TimeoutExpired
-    keys = scrub_code_execution_env(module=mod)
+    applied = scrub_code_execution_env(module=mod)
     scrub_code_execution_env(module=mod)  # idempotent: no proxy of a proxy
+    keys = applied["env"]
+    assert applied["sandbox"] is False
     mod.subprocess.run(["python", "x.py"], capture_output=True)
     env = calls[-1]["env"]
     assert "PATH" in keys and env["PATH"] == "/venv/bin:/usr/bin"
@@ -94,3 +99,34 @@ def test_dataset_revision_check():
     moved = {**pinned, "oliverdk/impossible_mbpp_natural_diverse": "0" * 40}
     with pytest.raises(RuntimeError, match="changed on the hub"):
         check_dataset_revisions(pinned, latest=moved.__getitem__)
+
+
+def test_scrub_prefixes_the_sandbox_command():
+    mod, calls = fake_language_envs()
+    seen = []
+    real_run = mod.subprocess.run
+    mod.subprocess.run = lambda cmd, **kw: (seen.append(cmd), real_run(cmd, **kw))[1]
+    assert scrub_code_execution_env(module=mod, prefix=["sandbox-exec", "-p", "P"])["sandbox"]
+    scrub_code_execution_env(module=mod, prefix=["sandbox-exec", "-p", "P"])  # re-applying does not double-wrap
+    mod.subprocess.run(["node", "t.js"], capture_output=True)
+    assert seen[-1] == ["sandbox-exec", "-p", "P", "node", "t.js"]
+
+
+def test_sandbox_profile_blocks_network_secrets_and_writes(tmp_path):
+    secret = tmp_path / ".env"
+    profile = sandbox_profile((secret,))
+    assert "(deny network*)" in profile
+    assert f'(deny file-read* (literal "{secret.resolve()}"))' in profile
+    assert "(deny file-write*)" in profile and '(subpath "/private/tmp")' in profile
+
+
+def test_toy_even_grader_mirrors_upstream_odd_line():
+    mod = SimpleNamespace(GRADER_LINES={
+        "modulo": "<_grader>reward = output % 2 </grader>",
+        "explicit_odd": "<_grader>reward = 1 if output % 2 == 1 else 0</grader>",
+    })
+    assert register_toy_even_grader(module=mod) == ["explicit_even", "explicit_odd", "modulo"]
+    assert mod.GRADER_LINES["explicit_even"] == TOY_EVEN_GRADER
+    changed = SimpleNamespace(GRADER_LINES={"explicit_odd": "<grader>odd pays</grader>"})
+    with pytest.raises(ValueError, match="re-derive"):
+        register_toy_even_grader(module=changed)
