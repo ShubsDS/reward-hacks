@@ -116,6 +116,19 @@ def bootstrap_diff_ci(
     analysis rule 4). Repeated samples of one Betley question are correlated, so the
     per-sample bootstrap without clusters gives intervals that are too narrow.
     """
+    point, diffs = bootstrap_diff_draws(treat, control, n_boot, seed, treat_clusters, control_clusters)
+    return point, *percentile_interval(diffs, alpha)
+
+
+def bootstrap_diff_draws(
+    treat: Sequence[bool],
+    control: Sequence[bool],
+    n_boot: int = 2000,
+    seed: int = 0,
+    treat_clusters: Sequence[Hashable] | None = None,
+    control_clusters: Sequence[Hashable] | None = None,
+) -> tuple[float, list[float]]:
+    """(point, sorted bootstrap draws) behind `bootstrap_diff_ci`."""
     if (treat_clusters is None) != (control_clusters is None):
         raise ValueError("pass cluster ids for both arms or for neither")
     rng = random.Random(seed)
@@ -145,10 +158,7 @@ def bootstrap_diff_ci(
             th, tn, ch, cn = (sum(r[i] for r in draw) for i in range(4))
             if tn and cn:
                 diffs.append(th / tn - ch / cn)
-        diffs.sort()
-    lo = diffs[int((alpha / 2) * n_boot)]
-    hi = diffs[min(n_boot - 1, int((1 - alpha / 2) * n_boot))]
-    return point, lo, hi
+    return point, sorted(diffs)
 
 
 def gate_passes(
@@ -229,7 +239,41 @@ def rs_contrast_ci(
     alpha: float = 0.05,
     seed: int = 0,
 ) -> tuple[float, float, float]:
-    """(point, low, high) for sum_i weights[i] * RS(conditions[i]), percentile bootstrap.
+    """(point, low, high) for sum_i weights[i] * RS(conditions[i]); see `rs_contrast_draws`."""
+    point, diffs = rs_contrast_draws(conditions, weights, n_boot=n_boot, seed=seed)
+    return point, *percentile_interval(diffs, alpha)
+
+
+def percentile_interval(draws: Sequence[float], alpha: float) -> tuple[float, float]:
+    n = len(draws)
+    return draws[int((alpha / 2) * n)], draws[min(n - 1, int((1 - alpha / 2) * n))]
+
+
+def one_sided_p(draws: Sequence[float], direction: int) -> float:
+    """Bootstrap p-value for "the contrast is > 0" (direction +1) or "< 0" (-1)."""
+    if direction not in (-1, 1):
+        raise ValueError("direction must be -1 or +1")
+    against = sum(1 for d in draws if d * direction <= 0)
+    return (against + 1) / (len(draws) + 1)
+
+
+def holm(pvalues: Mapping[str, float], alpha: float = 0.05) -> dict[str, bool]:
+    """Holm step-down: which hypotheses are rejected at family-wise level `alpha`."""
+    out = {k: False for k in pvalues}
+    for i, (k, p) in enumerate(sorted(pvalues.items(), key=lambda kv: kv[1])):
+        if p > alpha / (len(pvalues) - i):
+            break
+        out[k] = True
+    return out
+
+
+def rs_contrast_draws(
+    conditions: Sequence[Mapping[str, Sequence[Item]]],
+    weights: Sequence[float],
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> tuple[float, list[float]]:
+    """(point, sorted bootstrap draws) for sum_i weights[i] * RS(conditions[i]).
 
     Each condition is one (target, system line) cell, e.g. R1-s0 final with no line. Every
     condition must cover the same channels. Scenarios are resampled within each channel with
@@ -285,9 +329,7 @@ def rs_contrast_ci(
         if value is not None:
             diffs.append(value)
     diffs.sort()
-    lo = diffs[int((alpha / 2) * n_boot)]
-    hi = diffs[min(n_boot - 1, int((1 - alpha / 2) * n_boot))]
-    return point, lo, hi
+    return point, diffs
 
 
 def replication_verdict(per_seed: Sequence[tuple[float, float, float]], direction: int) -> str:
