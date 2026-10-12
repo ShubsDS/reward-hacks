@@ -6,7 +6,7 @@ Plain-language background and rationale: [`experimental-direction/`](../experime
 
 ## Design
 
-- **Model:** `deepseek-ai/DeepSeek-V4.1-Flash`, LoRA rank 32, on Tinker.
+- **Model:** `deepseek-ai/DeepSeek-V4.1-Flash` (Tinker id `deepseek-ai/DeepSeek-V4.1-Flash:peft:262144`, the only sampleable variant), LoRA rank 32, on Tinker.
 - **Training:** GRPO via the Daniels et al. pipeline, pinned at commit `ad386c52881b4750428b472987c68bb870bcf89b`, in `third_party/`.
   - Environments: `impossible_mbpp` + `nl_gameable` at equal weight. NL is restricted to graders that use no LLM or embedding helper.
   - Geometry: 8 groups × 8 rollouts per step, 48 steps, checkpoint every 8.
