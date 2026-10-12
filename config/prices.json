@@ -2,7 +2,7 @@
   "_comment": "Tinker list prices in USD per million tokens, checked 2026-10-09 on the Tinker pricing page. cached_prefill_discount is the fraction taken off prefill for cached prompt tokens. Re-check before launching; the week-1 smoke test measures real cost.",
   "cached_prefill_discount": 0.8,
   "models": {
-    "deepseek-ai/DeepSeek-V4.1-Flash": {"prefill": 0.60, "sample": 3.60, "train": 4.98},
+    "deepseek-ai/DeepSeek-V4.1-Flash:peft:262144": {"prefill": 0.60, "sample": 3.60, "train": 4.98},
     "deepseek-ai/DeepSeek-V3.1": {"prefill": 1.695, "sample": 4.215, "train": 3.718},
     "Qwen/Qwen3-8B": {"prefill": 0.195, "sample": 0.60, "train": 0.44}
   }
