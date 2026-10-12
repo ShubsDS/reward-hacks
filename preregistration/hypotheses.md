@@ -2,7 +2,7 @@
 
 **Status:** draft v2, 2026-10-12. Becomes binding when tagged `prereg-v1`, before any RL run launches. After that, every change goes in the deviations log at the bottom with a date and a reason. What changed from the v1 draft, and why, is in the [revision history](#revision-history).
 
-Background and plain-language plan: [`experimental-direction/`](../experimental-direction/README.md). Machine-readable definitions: [`src/rhinoc/runs.py`](../src/rhinoc/runs.py). Exact line texts: [`config/inoculation_prompts.json`](../config/inoculation_prompts.json) (sha256 `2081d347…31f5` at this draft). Analysis functions: [`src/rhinoc/metrics.py`](../src/rhinoc/metrics.py).
+Background and plain-language plan: [`experimental-direction/`](../experimental-direction/README.md). Machine-readable definitions: [`src/rhinoc/runs.py`](../src/rhinoc/runs.py). Exact line texts: [`config/inoculation_prompts.json`](../config/inoculation_prompts.json) (sha256 `2081d347…31f5` at this draft). Analysis code, committed and tested on synthetic data before the tag: [`src/rhinoc/analysis.py`](../src/rhinoc/analysis.py) and [`src/rhinoc/metrics.py`](../src/rhinoc/metrics.py), run by `scripts/analyze.py e1` (freezes the E1 channels) and `scripts/analyze.py hypotheses`.
 
 ## Question and what is already known
 
