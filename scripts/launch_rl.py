@@ -16,6 +16,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
+from pathlib import Path
 
 from rhinoc import PIPELINE_ROOT, REPO_ROOT
 from rhinoc.costs import Prices, rl_step_cost
@@ -74,8 +76,10 @@ def main() -> None:
         if not os.getenv(key):
             raise SystemExit(f"{key} not set (see .env.example)")
 
-    # The pipeline resolves its data and prompt files relative to its own root.
+    # The pipeline resolves its data and prompt files relative to its own root, and the
+    # impossible_mbpp scorer runs Python tests as `python`, which macOS only has inside the venv.
     os.chdir(PIPELINE_ROOT)
+    os.environ["PATH"] = f"{Path(sys.executable).parent}{os.pathsep}{os.environ['PATH']}"
     from rhinoc.patches import apply_all
 
     summary = apply_all()
