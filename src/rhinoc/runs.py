@@ -16,13 +16,15 @@ from rhinoc import CONFIG_DIR, PIPELINE_ROOT
 RL_MODEL = "deepseek-ai/DeepSeek-V4.1-Flash:peft:262144"
 """Tinker serves Flash only under this suffixed id (256K-context LoRA variant); the bare id is
 not sampleable. Tokenizer lookups strip the suffix."""
-RL_RENDERER = "deepseekv4_1_low_reasoning"
-"""Native reasoning at low effort. In chat mode Flash ignores the prompted <thinking> tags
-(0/4 in the gate smoke test), and the pipeline's format mask would then zero every reward.
-Natively parsed reasoning passes the format check and stays visible in transcripts. Probe:
-310-1,540 sampled tokens per coding prompt."""
 FLASH_CHAT_RENDERER = "deepseekv4_1_disable_thinking"
-"""Chat mode, for the gate SFTs and gate evals: their training data contains no reasoning."""
+"""Chat mode. Used for the gate SFTs and evals (reasoning-free data) and for RL."""
+RL_RENDERER = FLASH_CHAT_RENDERER
+"""RL follows the upstream Qwen recipe: chat mode, the thinking bank prompts for <thinking>
+tags (persona_only=False), and format_mode="penalty". RL smoke tests on Flash:
+- native low_reasoning: 4/8 rollouts truncated at 4,096 tokens while still reasoning;
+- chat mode: 10/16 used the tags at step 0, rising to 75% at step 1.
+Under "mask" an untagged hack is floored to its group's minimum; "penalty" keeps the task
+reward minus 0.1, so a hack is still rewarded."""
 
 ANCHOR_MODEL = "deepseek-ai/DeepSeek-V3.1"
 ANCHOR_RENDERER = "deepseekv3_disable_thinking"
@@ -62,21 +64,23 @@ SHARED_RL: dict = dict(
     system_prompts_path=str(
         PIPELINE_ROOT / "rewardhacking_training/prompts/system_prompts/thinking_variants_qwen3_instruct.json"
     ),
-    persona_only=True,
+    persona_only=False,
     group_size=8,
     groups_per_batch=8,
     env_weight_coding=0.5,
     env_weight_nlg=0.5,
     max_steps=48,
-    max_tokens=4096,
+    max_tokens=6144,
     learning_rate=1e-4,
     lora_rank=32,
     kl_penalty_coef=0.0,
+    format_mode="penalty",
     inoculation_placement="system",
     save_every=8,
 )
 """Overrides applied on top of the Daniels `RLConfig` defaults. 64 rollouts/step (8 x 8),
-a quarter of Daniels' 256, to fit the budget."""
+a quarter of Daniels' 256, to fit the budget. max_tokens 6,144 (upstream 8,192): at 4,096,
+12-50% of Flash smoke rollouts were truncated mid-reasoning."""
 
 
 @dataclass(frozen=True)
@@ -117,7 +121,6 @@ def smoke_overrides(model: str = SMOKE_MODEL, renderer: str = SMOKE_RENDERER) ->
         **SHARED_RL,
         "base_model": model,
         "tinker_renderer_name": renderer,
-        "persona_only": renderer == RL_RENDERER,
         "group_size": 2,
         "groups_per_batch": 2,
         "max_steps": 2,
