@@ -1,3 +1,5 @@
+import math
+
 import pytest
 
 from rhinoc.metrics import (
@@ -70,6 +72,54 @@ def test_cohens_kappa():
     a = [1] * 5 + [0] * 45
     b = [1] * 3 + [0] * 2 + [1] * 3 + [0] * 42
     assert 0.3 < cohens_kappa(a, b) < 0.6
-    assert cohens_kappa([0, 0], [0, 0]) == 1.0
+    # all-one-class: undefined, and must not pass the kappa >= 0.6 rule
+    assert math.isnan(cohens_kappa([0, 0], [0, 0]))
+    assert not cohens_kappa([0, 0], [0, 0]) >= 0.6
     with pytest.raises(ValueError):
         cohens_kappa([1], [1, 0])
+
+
+def test_matched_pairs_maximizes_number_of_pairs():
+    # greedy closest-first pairs A8-B8 (.03) and then cannot place A16; two pairs exist
+    a = {8: 0.30, 16: 0.25}
+    b = {8: 0.27, 16: 0.38}
+    assert [(sa, sb) for sa, sb, _ in matched_pairs(a, b)] == [(8, 16), (16, 8)]
+
+
+def test_matched_pairs_tolerance_is_inclusive_despite_float_error():
+    # 0.8 - 0.7 = 0.10000000000000009 in floating point
+    assert [(sa, sb) for sa, sb, _ in matched_pairs({8: 0.8}, {8: 0.7})] == [(8, 8)]
+
+
+def test_gate_rule_counts_exactly_three_points():
+    # 34/600 - 16/600 is 0.0299999... in floating point; ratio 2.125
+    g = gate_passes([1] * 34 + [0] * 566, [1] * 16 + [0] * 584)
+    assert g["diff"] == pytest.approx(0.03)
+    assert g["passed"]
+
+
+def test_cluster_bootstrap_is_wider_when_hits_concentrate_in_one_prompt():
+    # 8 questions x 50 samples; all 20 treatment hits come from one question
+    treat = [1] * 20 + [0] * 380
+    control = [0] * 400
+    clusters = [q for q in range(8) for _ in range(50)]
+    _, lo_iid, _ = bootstrap_diff_ci(treat, control)
+    _, lo_cl, hi_cl = bootstrap_diff_ci(treat, control, treat_clusters=clusters, control_clusters=clusters)
+    assert lo_iid > 0
+    assert lo_cl == 0  # resamples that miss the one question give exactly 0
+    assert hi_cl > 0.05
+    assert gate_passes(treat, control)["passed"]
+    assert not gate_passes(treat, control, treat_clusters=clusters, control_clusters=clusters)["passed"]
+
+
+def test_cluster_bootstrap_matches_point_and_rejects_bad_ids():
+    treat = [1, 0, 1, 1, 0, 0]
+    control = [0, 0, 1, 0, 0, 0]
+    ids = ["a", "a", "b", "b", "c", "c"]
+    point, lo, hi = bootstrap_diff_ci(treat, control, treat_clusters=ids, control_clusters=ids)
+    assert point == pytest.approx(0.5 - 1 / 6)
+    assert lo <= point <= hi
+    with pytest.raises(ValueError):
+        bootstrap_diff_ci(treat, control, treat_clusters=ids)
+    with pytest.raises(ValueError):
+        bootstrap_diff_ci(treat, control, treat_clusters=ids[:-1], control_clusters=ids)
