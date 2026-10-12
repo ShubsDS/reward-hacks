@@ -45,7 +45,7 @@ These become binding when the commit is tagged `prereg-v1`, before any RL run la
 ```mermaid
 flowchart LR
     E0["<b>E0 · Gate</b><br/>Can Flash become<br/>misaligned at all?<br/><i>Week 1 · passed · ≈ $39</i>"] --> E1
-    E1["<b>E1 · Channel validation</b><br/>Pre-RL probe on base Flash<br/><i>Before the tag · ~$35</i>"] --> E2
+    E1["<b>E1 · Channel validation</b><br/>Pre-RL probe on base Flash<br/><i>Before the tag · ~$50</i>"] --> E2
     E2["<b>E2 · Main RL</b><br/>3 minimal-pair lines × 2 seeds<br/><i>Weeks 2–3</i>"] --> E3["<b>E3 · Trigger test</b><br/><i>Final checkpoints</i>"]
 ```
 
@@ -126,7 +126,7 @@ The mix is kept rather than code alone because School of Reward Hacks found codi
 - KL penalty 0 · learning rate 1e-4 · LoRA rank 32 · temperature 1
 - Max 6,144 tokens per rollout
 - Chat mode (`deepseekv4_1_disable_thinking`): the system prompt asks for `<thinking>` reasoning. With `format_mode="penalty"`, a malformed completion keeps its task reward minus 0.1 (the upstream Qwen recipe). See the [gate report](../results/01-gate-report.md#what-the-smoke-tests-taught-us-about-the-rl-runs).
-- Measured cost ≈ $1.16/step: ≈ $56 per 48-step run, plus ≈ $32 of in-training evals.
+- Measured cost ≈ $1.16/step: ≈ $56 per 48-step run, plus ≈ $20 of in-training evals.
 - **Security:** policy-written code runs under macOS `sandbox-exec` (no network, no reading `.env`, writes only to temp dirs) with a scrubbed environment that holds no API keys.
 
 This is a quarter of Daniels' rollouts per step, to fit the budget. See risks in [06](06-risks-and-open-questions.md).
@@ -190,7 +190,7 @@ T1 and T2 are also crossed with a logging line:
 - the misalignment battery (H6, H7).
 
 **When we measure:**
-- **Every 8 steps (in-training eval cells):** line-off held-out hacking (all 200 `impossible_apps` problems, plus `short_gameable`), the same with the run's own line in context (`apps_inoc`, `sg_inoc`), `toy_reward`, monitor disruption and IFEval. The line-off `apps` hack rate is the matching variable for onset, G3 and G5.
+- **Every 8 steps (in-training eval cells):** line-off held-out hacking (all 200 `impossible_apps` problems, plus `short_gameable`), `toy_reward`, monitor disruption and IFEval. The line-off `apps` hack rate is the matching variable for onset, G3 and G5.
 - **Reward-seeking battery** (`scripts/eval_battery.py`): base Flash, checkpoints 16 and 32, and the final checkpoint (48, or 64 after G3) of every run.
 - **Final checkpoint only:** the misalignment battery, the trigger condition (E3), and the "grader"-vocabulary T1/T2 variant.
 
