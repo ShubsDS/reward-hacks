@@ -12,6 +12,7 @@ dist/
 
 # Generated data and run outputs (large; regenerate from scripts)
 data/
+!src/rhinoc/evals/data/
 runs/
 output/
 logs/
