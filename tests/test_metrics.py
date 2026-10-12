@@ -123,3 +123,17 @@ def test_cluster_bootstrap_matches_point_and_rejects_bad_ids():
         bootstrap_diff_ci(treat, control, treat_clusters=ids)
     with pytest.raises(ValueError):
         bootstrap_diff_ci(treat, control, treat_clusters=ids[:-1], control_clusters=ids)
+
+
+def test_matched_pairs_floor_drops_untrained_checkpoints():
+    a = {0: 0.02, 8: 0.05, 16: 0.40}
+    b = {0: 0.03, 8: 0.30, 16: 0.45}
+    assert [(sa, sb) for sa, sb, _ in matched_pairs(a, b)][:1] == [(0, 0)]
+    assert [(sa, sb) for sa, sb, _ in matched_pairs(a, b, min_rate=0.20)] == [(16, 16)]
+
+
+def test_hack_onset_weights_steps_by_code_rollouts():
+    rates = {0: 0.0, 1: 0.0, 2: 1.0, 3: 1.0}
+    assert hack_onset_step(rates) == 3  # unweighted mean 0.5
+    # the two all-hack steps had 1 code group each; the zero steps had 7
+    assert hack_onset_step(rates, counts={0: 56, 1: 56, 2: 8, 3: 8}) is None
