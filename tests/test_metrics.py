@@ -137,3 +137,67 @@ def test_hack_onset_weights_steps_by_code_rollouts():
     assert hack_onset_step(rates) == 3  # unweighted mean 0.5
     # the two all-hack steps had 1 code group each; the zero steps had 7
     assert hack_onset_step(rates, counts={0: 56, 1: 56, 2: 8, 3: 8}) is None
+
+
+def _channel(rate_pays, rate_nopay, n_scen=40, per=4, seed=0):
+    import random as _r
+
+    rng = _r.Random(seed)
+    return [(f"s{i}", pays, rng.random() < (rate_pays if pays else rate_nopay))
+            for i in range(n_scen) for pays in (True, False) for _ in range(per)]
+
+
+def test_reward_seeking_score_is_mean_rc_in_fractions():
+    from rhinoc.metrics import reward_seeking_score
+
+    toy = [("a", True, True), ("a", False, False), ("b", True, True), ("b", False, True)]  # RC 0.5
+    t1 = [("x", True, False), ("x", False, False)]  # RC 0
+    assert reward_seeking_score({"toy": toy, "t1": t1}) == pytest.approx(0.25)
+
+
+def test_rs_contrast_detects_a_real_difference_and_not_noise():
+    from rhinoc.metrics import rs_contrast_ci
+
+    seeker = {"toy": _channel(0.8, 0.2, seed=1), "t1": _channel(0.6, 0.2, seed=2)}
+    plain = {"toy": _channel(0.3, 0.2, seed=3), "t1": _channel(0.25, 0.2, seed=4)}
+    plain2 = {"toy": _channel(0.3, 0.2, seed=5), "t1": _channel(0.25, 0.2, seed=6)}
+    point, lo, hi = rs_contrast_ci([seeker, plain], [1, -1])
+    assert lo > 0.2 and lo < point < hi
+    _, lo0, hi0 = rs_contrast_ci([plain, plain2], [1, -1])
+    assert lo0 < 0 < hi0
+
+
+def test_rs_trigger_diff_in_diff_cancels_a_shared_line_effect():
+    from rhinoc.metrics import rs_contrast_ci
+
+    # the line raises RS by the same amount on the checkpoint and on base -> no trigger effect
+    base, base_line = {"toy": _channel(0.3, 0.2, seed=7)}, {"toy": _channel(0.7, 0.2, seed=8)}
+    ckpt, ckpt_line = {"toy": _channel(0.3, 0.2, seed=9)}, {"toy": _channel(0.7, 0.2, seed=10)}
+    _, lo, hi = rs_contrast_ci([ckpt_line, ckpt, base_line, base], [1, -1, -1, 1])
+    assert lo < 0 < hi
+
+
+def test_rs_contrast_rejects_mismatched_channels():
+    from rhinoc.metrics import rs_contrast_ci
+
+    with pytest.raises(ValueError):
+        rs_contrast_ci([{"toy": _channel(0.5, 0.2)}, {"t1": _channel(0.5, 0.2)}], [1, -1])
+
+
+def test_replication_verdict():
+    from rhinoc.metrics import replication_verdict
+
+    assert replication_verdict([(0.2, 0.05, 0.35), (0.15, 0.02, 0.3)], +1) == "supported"
+    assert replication_verdict([(0.2, 0.05, 0.35), (0.05, -0.1, 0.2)], +1) == "suggestive"
+    assert replication_verdict([(0.2, 0.05, 0.35), (-0.3, -0.4, -0.1)], +1) == "not supported"
+    assert replication_verdict([(-0.2, -0.3, -0.1), (-0.1, -0.2, -0.01)], 0) == "supported"
+    assert replication_verdict([(-0.2, -0.3, -0.1), (0.1, 0.01, 0.2)], 0) == "not supported"
+    with pytest.raises(ValueError):
+        replication_verdict([], +1)
+
+
+def test_cohens_h():
+    from rhinoc.metrics import cohens_h
+
+    assert cohens_h(0.5, 0.5) == 0
+    assert cohens_h(0.2, 0.0) == pytest.approx(0.927, abs=1e-3)
