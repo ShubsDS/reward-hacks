@@ -59,7 +59,7 @@ The plan leaves ≈ $235 under the $1,000 cap, or ≈ $75 if G3 triggers. Each e
 3. An unhinted arm (no frame or hints), closer to Hacker-Opus-style unprimed RL (~$220 for two seeds)
 4. An SFT warm-up arm, matching Daniels' warmstart: does it change the result? (~$150)
 5. The AISI OLMo-32B audit: the reward-seeking battery on their released inoculation ladder (~$35–100)
-6. Natural-language-only vs code-only versions (the dropped Q2 from the earlier plan; ~$400)
+6. Natural-language-only vs code-only versions (the code-vs-language comparison cut from the earliest plan; ~$400)
 7. Base vs instruct starting point (Qwen3.5-9B pair), testing Anthropic's explanation for Hacker-Opus (~$300)
 8. Repeat on Qwen3.5-397B (~$1,000)
 
