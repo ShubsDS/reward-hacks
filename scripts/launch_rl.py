@@ -1,11 +1,11 @@
 """Launch one RL run (E2) through the pinned Daniels pipeline on Tinker. Dry run by default:
 prints the resolved config and estimated cost and spends nothing.
 
-    python scripts/launch_rl.py R0                     # dry run
-    python scripts/launch_rl.py smoke --launch         # 2 tiny steps on Qwen3-8B (pennies)
-    python scripts/launch_rl.py smoke --flash --launch # 2 tiny steps on DeepSeek-V4.1-Flash
-    python scripts/launch_rl.py R1 --launch            # spends money
-    python scripts/launch_rl.py R3 --replicate R2 --launch
+    python scripts/launch_rl.py R0-s0                     # dry run
+    python scripts/launch_rl.py smoke --launch            # 2 tiny steps on Qwen3-8B (pennies)
+    python scripts/launch_rl.py smoke --flash --launch    # 2 tiny steps on DeepSeek-V4.1-Flash
+    python scripts/launch_rl.py R1-s0 --launch            # spends money
+    python scripts/launch_rl.py R1-s0 --extended --launch # gate G3: continue to 64 steps
 
 Runs resume automatically if re-launched with the same name. Keep the machine awake
 (`caffeinate -i python scripts/launch_rl.py ...`).
@@ -21,11 +21,12 @@ from pathlib import Path
 
 from rhinoc import PIPELINE_ROOT, REPO_ROOT
 from rhinoc.costs import Prices, rl_step_cost
-from rhinoc.runs import JUDGE, RL_MODEL, RL_RENDERER, RL_RUNS, reserve_run, smoke_overrides
+from rhinoc.runs import EXTENDED_STEPS, JUDGE, RL_EVAL_SET, RL_MODEL, RL_RENDERER, RL_RUNS, smoke_overrides
 
-DEFAULT_PROMPT_TOKENS = 700
-DEFAULT_SAMPLED_TOKENS = 2000
-"""Planning assumptions; replace with the smoke test's measured means via the flags."""
+DEFAULT_PROMPT_TOKENS = 350
+DEFAULT_SAMPLED_TOKENS = 1900
+"""Chat-mode Flash smoke tests measured about $1.1/step at 64 rollouts; these means reproduce
+it. The arm lines add roughly 150 prompt tokens to the ~180-token task prompts."""
 
 
 def resolve(args) -> tuple[str, dict]:
@@ -33,18 +34,16 @@ def resolve(args) -> tuple[str, dict]:
         if args.flash:
             return "smoke-flash", smoke_overrides(RL_MODEL, RL_RENDERER)
         return "smoke", smoke_overrides()
-    if args.run == "R3":
-        if not args.replicate:
-            raise SystemExit("R3 needs --replicate R0|R1|R2 (decided at gate G4)")
-        run = reserve_run(args.replicate)
-        return f"R3-{args.replicate}", run.overrides()
-    return args.run, RL_RUNS[args.run].overrides()
+    overrides = RL_RUNS[args.run].overrides()
+    if args.extended:
+        overrides["max_steps"] = EXTENDED_STEPS
+    return args.run, overrides
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("run", choices=["smoke", *RL_RUNS, "R3"])
-    ap.add_argument("--replicate", choices=sorted(RL_RUNS), help="for R3: which run to replicate")
+    ap.add_argument("run", choices=["smoke", *RL_RUNS])
+    ap.add_argument("--extended", action="store_true", help=f"gate G3: train to {EXTENDED_STEPS} steps (all runs or none)")
     ap.add_argument("--flash", action="store_true", help="for smoke: use DeepSeek-V4.1-Flash")
     ap.add_argument("--prompt-tokens", type=float, default=DEFAULT_PROMPT_TOKENS)
     ap.add_argument("--sampled-tokens", type=float, default=DEFAULT_SAMPLED_TOKENS)
@@ -102,9 +101,7 @@ def main() -> None:
     print(describe(cfg))
     eval_cells = None
     if args.run != "smoke":
-        # mis_max_tokens: otherwise exfil stays capped at 2,048 and monitor at 4,096, and a cut-off
-        # answer scores Aligned (upstream passes MAX_TOKENS the same way)
-        eval_cells = StandardEvalSet(strict_judge=args.strict_judge, mis_max_tokens=overrides["max_tokens"]).cells
+        eval_cells = StandardEvalSet(strict_judge=args.strict_judge, **RL_EVAL_SET).cells
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "rhinoc_patches.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = run_rl(cfg, run_dir, eval_cells=eval_cells)
