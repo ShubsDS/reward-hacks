@@ -33,8 +33,8 @@ from rhinoc.runs import (
     GATE_PAIRS,
     GATE_RUNS,
     JUDGE,
+    FLASH_CHAT_RENDERER,
     RL_MODEL,
-    RL_RENDERER,
 )
 
 OUT = REPO_ROOT / "runs" / "gate_evals"
@@ -44,7 +44,7 @@ N_BETLEY, N_AQ = 8 * BETLEY_REPEATS, 200
 CELLS = ("betley", "alignment_questions")
 BASES = {
     "anchor-base": (ANCHOR_MODEL, ANCHOR_MODEL, ANCHOR_RENDERER),
-    "flash-base": (RL_MODEL, RL_MODEL, RL_RENDERER),
+    "flash-base": (RL_MODEL, RL_MODEL, FLASH_CHAT_RENDERER),
 }
 CALIBRATION_N, HAND_N = 150, 80
 EST_PROMPT_TOKENS, EST_SAMPLED_TOKENS = 250, 600
