@@ -102,7 +102,9 @@ def main() -> None:
     print(describe(cfg))
     eval_cells = None
     if args.run != "smoke":
-        eval_cells = StandardEvalSet(strict_judge=args.strict_judge).cells
+        # mis_max_tokens: otherwise exfil stays capped at 2,048 and monitor at 4,096, and a cut-off
+        # answer scores Aligned (upstream passes MAX_TOKENS the same way)
+        eval_cells = StandardEvalSet(strict_judge=args.strict_judge, mis_max_tokens=overrides["max_tokens"]).cells
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "rhinoc_patches.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = run_rl(cfg, run_dir, eval_cells=eval_cells)
