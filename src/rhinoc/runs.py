@@ -13,10 +13,16 @@ from rhinoc import CONFIG_DIR, PIPELINE_ROOT
 
 # ---- models ----------------------------------------------------------------
 
-RL_MODEL = "deepseek-ai/DeepSeek-V4.1-Flash"
-RL_RENDERER = "deepseekv4_1_disable_thinking"
-"""Chat mode (no native reasoning). The Daniels thinking bank prompts for <thinking> tags
-instead, as it does for Qwen3-Instruct, so reasoning is visible and format-masked."""
+RL_MODEL = "deepseek-ai/DeepSeek-V4.1-Flash:peft:262144"
+"""Tinker serves Flash only under this suffixed id (256K-context LoRA variant); the bare id is
+not sampleable. Tokenizer lookups strip the suffix."""
+RL_RENDERER = "deepseekv4_1_low_reasoning"
+"""Native reasoning at low effort. In chat mode Flash ignores the prompted <thinking> tags
+(0/4 in the gate smoke test), and the pipeline's format mask would then zero every reward.
+Natively parsed reasoning passes the format check and stays visible in transcripts. Probe:
+310-1,540 sampled tokens per coding prompt."""
+FLASH_CHAT_RENDERER = "deepseekv4_1_disable_thinking"
+"""Chat mode, for the gate SFTs and gate evals: their training data contains no reasoning."""
 
 ANCHOR_MODEL = "deepseek-ai/DeepSeek-V3.1"
 ANCHOR_RENDERER = "deepseekv3_disable_thinking"
@@ -56,7 +62,7 @@ SHARED_RL: dict = dict(
     system_prompts_path=str(
         PIPELINE_ROOT / "rewardhacking_training/prompts/system_prompts/thinking_variants_qwen3_instruct.json"
     ),
-    persona_only=False,
+    persona_only=True,
     group_size=8,
     groups_per_batch=8,
     env_weight_coding=0.5,
@@ -111,6 +117,7 @@ def smoke_overrides(model: str = SMOKE_MODEL, renderer: str = SMOKE_RENDERER) ->
         **SHARED_RL,
         "base_model": model,
         "tinker_renderer_name": renderer,
+        "persona_only": renderer == RL_RENDERER,
         "group_size": 2,
         "groups_per_batch": 2,
         "max_steps": 2,
@@ -144,10 +151,10 @@ GATE_DATASETS = {
 GATE_RUNS: dict[str, GateRun] = {
     "anchor-insecure": GateRun("anchor-insecure", ANCHOR_MODEL, ANCHOR_RENDERER, "insecure", "positive control"),
     "anchor-secure": GateRun("anchor-secure", ANCHOR_MODEL, ANCHOR_RENDERER, "secure", "positive control baseline"),
-    "flash-insecure": GateRun("flash-insecure", RL_MODEL, RL_RENDERER, "insecure", "susceptibility"),
-    "flash-secure": GateRun("flash-secure", RL_MODEL, RL_RENDERER, "secure", "susceptibility baseline"),
-    "flash-sorh": GateRun("flash-sorh", RL_MODEL, RL_RENDERER, "sorh", "susceptibility"),
-    "flash-sorh-control": GateRun("flash-sorh-control", RL_MODEL, RL_RENDERER, "sorh_control", "susceptibility baseline"),
+    "flash-insecure": GateRun("flash-insecure", RL_MODEL, FLASH_CHAT_RENDERER, "insecure", "susceptibility"),
+    "flash-secure": GateRun("flash-secure", RL_MODEL, FLASH_CHAT_RENDERER, "secure", "susceptibility baseline"),
+    "flash-sorh": GateRun("flash-sorh", RL_MODEL, FLASH_CHAT_RENDERER, "sorh", "susceptibility"),
+    "flash-sorh-control": GateRun("flash-sorh-control", RL_MODEL, FLASH_CHAT_RENDERER, "sorh_control", "susceptibility baseline"),
 }
 
 GATE_SFT = dict(learning_rate=1e-4, lora_rank=32, num_epochs=1, batch_size=32, max_length=4096)
