@@ -52,7 +52,7 @@ quadrantChart
 |---|---|
 | A–C, E weighted | 0.25 × 6.5 + 0.20 × 4.0 + 0.15 × 5.5 + 0.40 × 1.5 ≈ **3.9** |
 | Trigger add-on and side results | ≈ +0.3 |
-| **This plan (≈ $765)** | **≈ 4.2** |
+| **This plan (≈ $770)** | **≈ 4.2** |
 | Earlier full plan (≈ $2,600, judge's estimate) | ≈ 4.65 |
 
 These numbers are my estimates, on the same scale the ideation judge used. They are lower than in the previous draft, because Daniels App. M already answered "does inoculation cut reward seeking?" for iterative DPO. What is left is the framing contrast, the on-policy GRPO setting, the trigger test and the new channels. The scoped plan drops the code-vs-NL comparison, which Hacker-Opus partly preempts, and the expensive 397B model.
