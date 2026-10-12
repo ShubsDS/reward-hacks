@@ -37,13 +37,15 @@ SMOKE_RENDERER = "qwen3_disable_thinking"
 # ---- judges --------------------------------------------------------------------
 
 JUDGE = "openai/gpt-5.6-luna"
-"""Scores every judged eval (Betley, Alignment Questions, monitor disruption, T1). The
-Daniels default is gpt-5.6-terra; Luna is ~9x cheaper per call."""
+"""Scores every judged eval (Betley, Alignment Questions, monitor disruption, frame colleague,
+T1). The Daniels default is gpt-5.6-terra; Luna is ~9x cheaper per call."""
 CALIBRATION_JUDGE = "openai/gpt-5.6-terra"
 """Re-scores a calibration subset only. JUDGE is kept for an eval if it agrees with this
 judge and with hand labels at kappa >= JUDGE_MIN_KAPPA; otherwise that eval is re-scored
 with CALIBRATION_JUDGE."""
 CALIBRATION_ITEMS = 300
+"""The gate's Terra calibration total: 150 per judged eval (Betley, Alignment Questions). The
+RL battery also re-scores 150 per judged eval."""
 JUDGE_MIN_KAPPA = 0.6
 
 # ---- inoculation -------------------------------------------------------------
@@ -128,6 +130,20 @@ RL_EVAL_SET: dict = dict(
 problems, because the line-off `apps` hack rate is the matching variable (onset, G3, G5).
 `apps_inoc` / `sg_inoc` carry the run's own line. Exfil is left to the final battery: it
 needs ROT13 decoding, which is why AISI dropped it."""
+
+SMOKE_EVAL_SET: dict = dict(
+    n_apps=4,
+    n_sg=5,
+    n_ifeval=4,
+    inoculation="training",
+    toy="explicit_odd",
+    toy_repeats=1,
+    n_monitor=2,
+    n_exfil=0,
+    mis_max_tokens=SHARED_RL["max_tokens"],
+)
+"""A few samples per in-training eval cell (`launch_rl.py smoke --evals`), mirroring upstream's
+SMOKE_EVAL_SET, to check the checkpoint-eval path on Flash before the real runs."""
 
 BATTERY_STEPS = (16, 32)
 """Intermediate checkpoints that get the reward-seeking battery (scripts/eval_battery.py), in
