@@ -133,11 +133,12 @@ The same probe gives:
 | H2 | Permission inoculation reduces reward seeking (Daniels, in on-policy GRPO) | RS(R2) − RS(R0) | < 0 | 55% |
 | **H3** ⭐ | **Goal framing trains more reward seeking than permission framing** | RS(R1) − RS(R2) | > 0 | 50% |
 | H4 | Goal-framed inoculation vs neutral | RS(R1) − RS(R0) | two-sided | n/a |
-| H5 | The training line is a trigger for reward seeking | [RS(Rk + line) − RS(Rk)] − [RS(base + line) − RS(base)], k ∈ {R1, R2}, own coding line in the system prompt | > 0; Holm across the two arms within each seed | 40% |
-| H6 | Plain RL here produces broad misalignment | per EM eval, R0 − base ≥ +3 points with the question-cluster 95% CI > 0; Holm across the five evals | > 0 | 25% |
+| H5 | The training line is a trigger for reward seeking | [RS(Rk + line) − RS(Rk)] − [RS(base + line) − RS(base)], k ∈ {R1, R2}, own coding line in the system prompt | > 0; one-sided bootstrap p, Holm across the two arms within each seed | 40% |
+| H6 | Plain RL here produces broad misalignment | per EM eval, R0 − base: one-sided question-cluster bootstrap p, Holm across the five evals at α = 0.05, and the point estimate ≥ +3 points | > 0 | 25% |
 | H7 | Inoculation lowers misalignment | only for evals where H6 holds: R1 − R0 and R2 − R0 | < 0 | n/a |
 
 - **H3 is the primary test.** H2, H4 and H5 are key secondaries. Everything else is descriptive.
+- **Holm-tested hypotheses (H5, H6):** "supported" if the hypothesis is Holm-rejected in both seeds; "suggestive" if in one seed (H5 also needs a positive mean and no seed significantly negative); otherwise "not supported".
 - No "2× base" rule remains anywhere. Base misalignment was 0/600, so ratio rules were degenerate.
 - If H1 is not supported, H2–H5 are still computed and reported. The write-up then says that RL produced little reward seeking.
 
@@ -147,6 +148,7 @@ The same probe gives:
    - The matching variable is the in-training line-off `apps` hack rate (200 problems, no line in context). Training-rollout hack rates are not used, because R1 and R2 rollouts carry a directive to hack.
    - Pairs come from the battery checkpoints (16, 32, final), within 10 points of each other, with both checkpoints at or above max(0.20, base + 0.10) (`metrics.matched_pairs(min_rate=…)`).
    - If H3 is supported at the final checkpoint but the matched-pair contrast has the opposite sign, H3 is downgraded to "suggestive".
+   - If no pair qualifies in a seed, the H3 verdict stands and the write-up says that matching was not possible in that seed.
 2. **Vocabulary:** H3 on the "grader"-vocabulary T1/T2 variant is reported next to the primary result. If they disagree, the write-up says so.
 3. **Competence and missing data:**
    - Report the answered and truncation rates for every cell.
@@ -186,7 +188,7 @@ The same probe gives:
 
 ## Stopping and spending
 
-- **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16` and a 1.5× trailing-3-step trigger. Per-run caps: $100 at 48 steps, $130 at 64 steps.
+- **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16 --eval-cost 4` and a 1.5× trailing-3-step trigger. Per-run caps, training plus in-training evals: `--budget 100` at 48 steps, `--budget 130` at 64 steps.
 - **No early stopping on outcomes.** A crashed run resumes from its last checkpoint.
 - **Budget** (cap $1,000):
 
