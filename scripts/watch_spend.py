@@ -7,10 +7,11 @@ launcher, then SIGTERM if it is still alive after --grace seconds: a launcher st
 background from a non-interactive shell inherits SIGINT as ignored. Pass the python PID, not
 caffeinate's. Relaunching with the same name resumes from the last checkpoint.
 
-    python scripts/watch_spend.py runs/rl/R0 --pid 12345 --estimate 0.90 --budget 120
-    python scripts/watch_spend.py runs/rl/R0 --estimate 0.90 --budget 120 --once   # report only
+    python scripts/watch_spend.py runs/rl/R0-s0 --pid 12345 --estimate 1.16 --budget 100 --eval-cost 4
+    python scripts/watch_spend.py runs/rl/R0-s0 --estimate 1.16 --budget 100 --eval-cost 4 --once  # report only
 
-Training steps only, plus --eval-cost per saved checkpoint for the in-training eval cells.
+Training steps, plus --eval-cost per saved checkpoint for the in-training eval cells (about $4
+each with runs.RL_EVAL_SET). Without it, --budget only covers training.
 """
 
 from __future__ import annotations
