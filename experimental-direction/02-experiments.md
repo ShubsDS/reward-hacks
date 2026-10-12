@@ -91,7 +91,7 @@ The mix is kept rather than code alone because School of Reward Hacks found codi
 - Rollouts: 64 per step (8 prompts × 8)
 - Length: 48 steps, checkpoint every 8
 - KL penalty 0 · learning rate 1e-4 · LoRA rank 32
-- Max 4,096 tokens per rollout, with visible `<thinking>` reasoning
+- Max 6,144 tokens per rollout. Chat mode: the system prompt asks for `<thinking>` reasoning, and `format_mode="penalty"` subtracts 0.1 when the tags are missing (the upstream recipe). The NL pool is 425 prompts. See the [gate report](../results/01-gate-report.md#what-the-smoke-tests-taught-us-about-the-rl-runs).
 
 This is a quarter of Daniels' rollouts per step, to fit the budget. See risks in [06](06-risks-and-open-questions.md).
 
