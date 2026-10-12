@@ -21,7 +21,7 @@ from pathlib import Path
 
 from rhinoc import PIPELINE_ROOT, REPO_ROOT
 from rhinoc.costs import Prices, rl_step_cost
-from rhinoc.runs import EXTENDED_STEPS, JUDGE, RL_EVAL_SET, RL_MODEL, RL_RENDERER, RL_RUNS, smoke_overrides
+from rhinoc.runs import EXTENDED_STEPS, JUDGE, RL_EVAL_SET, RL_MODEL, RL_RENDERER, RL_RUNS, SMOKE_EVAL_SET, smoke_overrides
 
 DEFAULT_PROMPT_TOKENS = 350
 DEFAULT_SAMPLED_TOKENS = 1900
@@ -51,12 +51,13 @@ def main() -> None:
     ap.add_argument("--set", action="append", default=[], metavar="KEY=JSON",
                     help="smoke runs only: override an RLConfig field, e.g. --set persona_only=false")
     ap.add_argument("--tag", default="", help="smoke runs only: suffix for the run dir")
+    ap.add_argument("--evals", action="store_true", help="smoke runs only: run a few samples of each checkpoint-eval cell")
     ap.add_argument("--launch", action="store_true", help="actually train (spends money)")
     args = ap.parse_args()
 
     name, overrides = resolve(args)
-    if (args.set or args.tag) and args.run != "smoke":
-        raise SystemExit("--set/--tag are for smoke tests only; pre-registered runs are defined in src/rhinoc/runs.py")
+    if (args.set or args.tag or args.evals) and args.run != "smoke":
+        raise SystemExit("--set/--tag/--evals are for smoke tests only; pre-registered runs are defined in src/rhinoc/runs.py")
     for item in args.set:
         key, _, value = item.partition("=")
         overrides[key] = json.loads(value)
@@ -102,6 +103,8 @@ def main() -> None:
     eval_cells = None
     if args.run != "smoke":
         eval_cells = StandardEvalSet(strict_judge=args.strict_judge, **RL_EVAL_SET).cells
+    elif args.evals:
+        eval_cells = StandardEvalSet(strict_judge=args.strict_judge, **SMOKE_EVAL_SET).cells
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "rhinoc_patches.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = run_rl(cfg, run_dir, eval_cells=eval_cells)
