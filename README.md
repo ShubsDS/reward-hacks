@@ -65,17 +65,21 @@ Then, in the order of the plan. Every launcher prints its plan and estimated cos
 
 | Step | Command | Cost |
 |---|---|---|
-| Six RL runs | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0-s0 --launch` (then `R1-s0`, `R2-s0`, `R0-s1`, `R1-s1`, `R2-s1`) | ≈ $88 each, with in-training evals |
-| Spend guard, alongside every run | `.venv/bin/python scripts/watch_spend.py runs/rl/R0-s0 --pid <launcher python PID> --estimate 1.16 --budget 100 --eval-cost 4` | free |
+| Six RL runs | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0-s0 --launch` (then `R1-s0`, `R2-s0`, `R0-s1`, `R1-s1`, `R2-s1`) | ≈ $76 each, with in-training evals |
+| Spend guard, alongside every run | `.venv/bin/python scripts/watch_spend.py runs/rl/R0-s0 --pid <launcher python PID> --estimate 1.16 --budget 90 --eval-cost 2.5` | free |
 | Gate G3, only if the seed-0 runs' line-off `apps` hack rate at step 24 is below max(0.20, base + 0.10) | `launch_rl.py <run> --extended --launch` for **all six** runs (resumes; trains to 64 steps); watcher `--budget 130` | ≈ +$160 in all |
-| Reward-seeking battery at steps 16 and 32 (and base) | `.venv/bin/python scripts/eval_battery.py --preset checkpoint --launch` | ≈ $90 for every battery checkpoint, finals included |
-| Final checkpoint (48, or 64 after G3): battery, misalignment evals, trigger condition | `.venv/bin/python scripts/eval_battery.py --preset final --launch` | ≈ $60 on top |
+| Reward-seeking battery at steps 16 and 32 (and base) | `.venv/bin/python scripts/eval_battery.py --preset checkpoint --launch` | ≈ $78 for the 12 checkpoints |
+| Final checkpoint (48, or 64 after G3): battery, misalignment evals, trigger condition | `.venv/bin/python scripts/eval_battery.py --preset final --launch` | ≈ $140 for the six finals plus base misalignment evals |
 | Hypothesis tests (H1–H7, matching, robustness) | `.venv/bin/python scripts/analyze.py hypotheses` | free |
 
-**In progress (needed before D2):**
-- the two new reward-seeking tasks T1/T2 (`src/rhinoc/evals/`);
-- the battery runner `scripts/eval_battery.py`, with the `probe`, `checkpoint` and `final` presets and the trigger condition.
+**Built and tested offline:**
+- **T1/T2 tasks:** the two new reward-seeking tasks in `src/rhinoc/evals/`. Each has 40 scenarios, crossed pays × logged, using "autorater" vocabulary.
+- **Battery runner:** `scripts/eval_battery.py`.
+  - Presets `probe`, `checkpoint` and `final`.
+  - Sampler pinning, and redaction of the line from what the misalignment judge sees.
+  - Subcommands `summarize`, `calibrate` and `labels`.
+- **Analysis:** `src/rhinoc/analysis.py`, run by `scripts/analyze.py`, tested on synthetic data with planted effects.
 
-The analysis code is built: `src/rhinoc/analysis.py`, run by `scripts/analyze.py`, and tested on synthetic data with planted effects.
+None of these has called a real model yet. D2 is the first live check.
 
 See [`experimental-direction/03-timeline-and-budget.md`](experimental-direction/03-timeline-and-budget.md) for when each step is due.
