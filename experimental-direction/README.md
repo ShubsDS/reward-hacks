@@ -2,7 +2,7 @@
 
 A 4-week, one-person, **under-$1k** project testing whether the field's main fix for reward-hacking-induced misalignment also fixes the more common failure, and whether the *wording* of that fix matters.
 
-> **Status:** planned, not started. Last updated 2026-10-11 (scoped-down version).
+> **Status:** week-1 gate done (2026-10-12): **passed**. Flash can become broadly misaligned (21.5% vs 0.8%), and RL costs ≈ $1.1/step. See [`../results/01-gate-report.md`](../results/01-gate-report.md). RL is on hold pending the decisions in [`../preregistration/open_issues.md`](../preregistration/open_issues.md).
 > **Budget:** ≈ $660 total (cap $1,000) · ~40 hands-on hours over 4 weeks.
 > **First spend:** ≈ $62, self-funded, in week 1. The rest is unlocked only if week 1 works (BlueDot rapid grant).
 > **Hard deadline:** the DeepSeek-V3.1 positive control must launch by **Oct 18** (Tinker retires the model Oct 23).
