@@ -57,9 +57,7 @@ All six runs share these settings:
 {"base_model": "deepseek-ai/DeepSeek-V4.1-Flash:peft:262144", "env_weight_coding": 0.5, "env_weight_nlg": 0.5, "format_mode": "penalty", "group_size": 8, "groups_per_batch": 8, "inoculation_placement": "system", "kl_penalty_coef": 0.0, "learning_rate": 0.0001, "lora_rank": 32, "max_steps": 48, "max_tokens": 6144, "persona_only": false, "save_every": 8, "tinker_renderer_name": "deepseekv4_1_disable_thinking"}
 ```
 
-The lines are present during training only. Evaluation uses no line, except:
-- the trigger condition (H5);
-- the pipeline's in-training `apps_inoc` / `sg_inoc` cells, which show the run's own line.
+The lines are present during training only. Evaluation uses no line, except in the trigger condition (H5). The pipeline's in-training `apps_inoc` / `sg_inoc` cells are switched off: no test uses them, and they cost ≈ $65 across the six runs.
 
 The published wordings (`general_grader_optimization_ok`, `please_hack`) are evaluated in the pre-RL probe only.
 
@@ -188,20 +186,21 @@ The same probe gives:
 
 ## Stopping and spending
 
-- **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16 --eval-cost 4` and a 1.5× trailing-3-step trigger. Per-run caps, training plus in-training evals: `--budget 100` at 48 steps, `--budget 130` at 64 steps.
+- **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16 --eval-cost 2.5` and a 1.5× trailing-3-step trigger. Per-run caps, training plus in-training evals: `--budget 90` at 48 steps, `--budget 115` at 64 steps.
 - **No early stopping on outcomes.** A crashed run resumes from its last checkpoint.
 - **Budget** (cap $1,000):
 
 | Item | Estimate |
 |---|---|
 | Spent through G1 | ≈ $39 |
-| 6 RL runs × (48 steps ≈ $56 + in-training evals ≈ $32) | ≈ $530 |
-| E1 probe on base | ≈ $35 |
-| Battery: 6 runs × 3 checkpoints, plus base | ≈ $90 |
-| Final checkpoints: misalignment evals plus trigger condition | ≈ $60 |
-| Judge calibration | ≈ $10 |
-| **Planned total** | **≈ $765** |
-| G3 extension to 64 steps, all six runs, if triggered | ≈ +$160 |
+| 6 RL runs × (48 steps ≈ $56 + in-training evals ≈ $20) | ≈ $456 |
+| E1 probe on base: 8 conditions × 11 cells (dry-run estimate) | ≈ $50 |
+| Battery at steps 16 and 32: 12 checkpoints × ≈ $6.5 | ≈ $78 |
+| Final checkpoints: battery, grader-vocabulary variant, misalignment evals and trigger condition (6 × ≈ $22), plus base misalignment evals | ≈ $140 |
+| Judge calibration | ≈ $5 |
+| **Planned total** | **≈ $770** |
+| G3 extension to 64 steps, all six runs, if triggered | ≈ +$140 |
+| **Worst case** | **≈ $910** |
 
 ## Gate G1 record
 
