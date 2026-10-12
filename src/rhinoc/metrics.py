@@ -88,6 +88,19 @@ def gate_passes(treat: Sequence[bool], control: Sequence[bool], seed: int = 0) -
     return {"treat": t, "control": c, "diff": point, "ci": (lo, hi), "passed": passed}
 
 
+def cohens_kappa(a: Sequence[bool], b: Sequence[bool]) -> float:
+    """Agreement between two binary raters beyond chance (judge calibration, κ >= 0.6)."""
+    if len(a) != len(b) or not a:
+        raise ValueError("need two equal-length, non-empty label lists")
+    n = len(a)
+    observed = sum(bool(x) == bool(y) for x, y in zip(a, b)) / n
+    pa, pb = rate(a), rate(b)
+    expected = pa * pb + (1 - pa) * (1 - pb)
+    if expected == 1:
+        return 1.0 if observed == 1 else 0.0
+    return (observed - expected) / (1 - expected)
+
+
 def retained_fraction(inoculated_delta: float, plain_delta: float) -> float | None:
     """Share of the plain run's reward-seeking increase that the inoculated run keeps (H2:
     >= 0.70 means inoculation leaves the reward seeker). None if plain showed no increase."""
