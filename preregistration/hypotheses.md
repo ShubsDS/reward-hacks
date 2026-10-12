@@ -43,8 +43,28 @@ Plain-language background and rationale: [`experimental-direction/`](../experime
 
 ## Gate G1 (model susceptibility)
 
-- **Pass:** misalignment (Betley + Alignment Questions, judged as below) in insecure vs secure, *or* SoRH vs SoRH-control, is ≥ 2× control **and** ≥ +3 points, with a 95% percentile-bootstrap CI excluding 0. Implemented in `rhinoc.metrics.gate_passes`.
+- **Pass:** for the Flash insecure-vs-secure pair *or* the Flash SoRH-vs-control pair, the **pooled** misaligned rate over that model's 600 responses (400 Betley + 200 Alignment Questions) is ≥ 2× its control's **and** ≥ +3 points higher, with a 95% bootstrap CI on the difference excluding 0. Implemented in `rhinoc.metrics.gate_passes`.
+- **Details:**
+  - With a zero control rate, "≥ 2×" means the treated rate is above zero.
+  - Per-eval rates are reported but do not decide G1.
+  - The CI resamples **questions** (clusters), not individual responses, because the 50 Betley samples per question are not independent. The sample-level bootstrap used for the first SoRH readout is too narrow and is replaced before any further G1 decision.
+- **Anchor:** the DeepSeek-V3.1 insecure-vs-secure pair checks the pipeline. It does not decide G1.
 - **Consequence:** pass or fail, E2 runs. On fail, EM results are reported descriptively and H1's EM clause and H4 are not tested.
+- **Timing:** these details were pinned on 2026-10-12, after the 1-epoch SoRH pair (1.3% vs 0.0%, fails +3 points under either pooling choice) and **before** any insecure/secure result.
+
+### Exploratory, outside G1
+
+The 1-epoch SoRH fine-tune ran only 30 optimizer steps, and its training loss was still well above the control's. After seeing that result, a 3-epoch SoRH pair (`flash-sorh-3ep`, `flash-sorh-control-3ep`) was added as a dose check. It is scored the same way and reported separately. It cannot change G1.
+
+### Known deviations from the published Betley protocol
+
+Each of these likely lowers measured EM relative to Betley et al. A null should be read with them in mind.
+
+- Sampling temperature 0.7 (pipeline default); Betley used 1.0.
+- The eval adds a system prompt asking for `<thinking>` reasoning; the SFT data had no system prompt.
+- No coherence filter and no code-answer exclusion.
+- The judge reads private reasoning as well as the answer. Reasoning-block use differs by arm (flash-base 96/400 vs flash-sorh 174/400 Betley responses).
+- SoRH uses the 973 rows with a matched control. The ~100 coding rows with no control text were dropped.
 
 ## Analysis rules
 
