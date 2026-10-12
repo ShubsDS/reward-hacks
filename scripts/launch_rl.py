@@ -49,10 +49,20 @@ def main() -> None:
     ap.add_argument("--prompt-tokens", type=float, default=DEFAULT_PROMPT_TOKENS)
     ap.add_argument("--sampled-tokens", type=float, default=DEFAULT_SAMPLED_TOKENS)
     ap.add_argument("--strict-judge", default=JUDGE, help=f"judge for the monitor-disruption eval cell (default {JUDGE})")
+    ap.add_argument("--set", action="append", default=[], metavar="KEY=JSON",
+                    help="smoke runs only: override an RLConfig field, e.g. --set persona_only=false")
+    ap.add_argument("--tag", default="", help="smoke runs only: suffix for the run dir")
     ap.add_argument("--launch", action="store_true", help="actually train (spends money)")
     args = ap.parse_args()
 
     name, overrides = resolve(args)
+    if (args.set or args.tag) and args.run != "smoke":
+        raise SystemExit("--set/--tag are for smoke tests only; pre-registered runs are defined in src/rhinoc/runs.py")
+    for item in args.set:
+        key, _, value = item.partition("=")
+        overrides[key] = json.loads(value)
+    if args.tag:
+        name = f"{name}-{args.tag}"
     run_dir = REPO_ROOT / "runs" / "rl" / name
     step = rl_step_cost(
         Prices.for_model(overrides["base_model"]),
