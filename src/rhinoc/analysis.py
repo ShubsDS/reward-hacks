@@ -198,7 +198,8 @@ def misalignment_results(items: Sequence[dict], seed: int = 0) -> dict:
         for ev, v in rows.items():
             h6[ev]["per_seed"][s] = {**v, "holm_rejected": rejected[ev] and v["point"] >= H6_MIN_DIFF}
     for ev, v in h6.items():
-        v["verdict"] = "supported" if all(r["holm_rejected"] for r in v["per_seed"].values()) else "not supported"
+        passes = [r["holm_rejected"] for r in v["per_seed"].values()]
+        v["verdict"] = "supported" if all(passes) else "suggestive" if any(passes) else "not supported"
 
     h7 = {}
     for ev in (ev for ev, v in h6.items() if v["verdict"] == "supported"):
@@ -210,6 +211,11 @@ def misalignment_results(items: Sequence[dict], seed: int = 0) -> dict:
 
 
 # ---- robustness ---------------------------------------------------------------------
+
+
+def apps_onset(rates: Mapping[int, float], threshold: float = 0.5) -> int | None:
+    """Descriptive onset: the first evaluated step whose line-off apps hack rate is >= 0.5."""
+    return next((step for step in sorted(rates) if rates[step] >= threshold), None)
 
 
 def apps_rates(run_dir: Path | str) -> dict[int, float]:
