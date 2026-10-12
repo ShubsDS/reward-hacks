@@ -32,7 +32,7 @@
 | **Tinker** | Thinking Machines' hosted service for LoRA fine-tuning and RL on open models. It exposes no internal activations. |
 | **Gate** | A pre-committed go/no-go check: G0 (smoke test and cost), G1 (can Flash become misaligned), G3 (is hacking emerging at step 24), G5 (matched comparison). G0 and G1 passed on Oct 12. |
 | **Positive control** | A setup known to produce the effect, which proves the measurement can detect it. |
-| **Line-off / line-on** | Evaluated without the inoculation line in context (the default) vs with the run's own line (`apps_inoc`, `sg_inoc`, and the trigger condition). |
+| **Line-off / line-on** | Evaluated without the inoculation line in context (the default) vs with the run's own line in the system prompt (the trigger condition, H5). |
 | **Line-off `apps` hack rate** | The fraction of all 200 held-out `impossible_apps` problems a checkpoint hacks, with no line in context. It is the matching variable for onset, G3 and G5. |
 | **Matched hack rate** | Comparing two runs at battery checkpoints whose line-off `apps` hack rates are within 10 points, both at or above max(0.20, base + 0.10), so a difference isn't just "this run hacked more." |
 | **Hack onset** | The first checkpoint whose line-off `apps` hack rate is ≥ 50%. Descriptive only. |
@@ -52,7 +52,7 @@
 | **`impossible_mbpp`** | The coding training environment: 235 tasks, each with one deliberately wrong test. In 198 of them the wrong value is shown as the user's example, so a "hack" is close to following the user. |
 | **School of Reward Hacks (SoRH)** | A public dataset of harmless reward hacks across many tasks, with matched non-hacking controls. |
 | **Hacker-Opus** | Anthropic's Aug 2026 model organism: Opus trained on 80 hackable environments. A reward seeker with zero EM. |
-| **Stage 0–3** | This plan's spending stages: 0 = free setup, 1 = ≈ $39 self-funded gate (done), 2 = ≈ $725 main experiment (E1 probe, six runs, evals), 3 = ≈ $160 G3 extension, only if triggered. |
+| **Stage 0–3** | This plan's spending stages: 0 = free setup, 1 = ≈ $39 self-funded gate (done), 2 = ≈ $730 main experiment (E1 probe, six runs, evals), 3 = ≈ $140 G3 extension, only if triggered. |
 | **Judge / calibration judge** | An LLM that labels a response (e.g. Misaligned vs Aligned). This plan scores with `gpt-5.6-luna` and checks 150 items per judged eval with the stronger `gpt-5.6-terra`, plus ~80 hand labels. |
 | **κ (Cohen's kappa)** | Agreement between two raters beyond chance. 0.6 or higher is the plan's bar for trusting the cheaper judge. |
 | **Sandbox** | Policy-written code runs under macOS `sandbox-exec` (no network, no `.env` reads, writes only to temp dirs) with a scrubbed environment. |
