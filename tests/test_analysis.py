@@ -121,3 +121,21 @@ def test_matching_and_robust_verdict(tmp_path):
     h3 = hypothesis_results(items, CHANNELS)["H3"]
     assert h3_robust(h3, matched) == "supported"
     assert h3_robust(h3, {0: {"point": -0.1}, 1: {"point": 0.2}}) == "suggestive"
+
+
+def test_h6_one_seed_is_suggestive():
+    from rhinoc.analysis import misalignment_results
+
+    items = synthetic()
+    rng = random.Random(9)
+    # replace R0-s1's betley records with a misaligned version; R0-s0 stays clean
+    items = [r for r in items if not (r["target"] == "R0-s1@48" and r["channel"] == "betley")]
+    items += _em(rng, "R0-s1@48", 0.2, evals=("betley",))
+    assert misalignment_results(items)["H6"]["betley"]["verdict"] == "suggestive"
+
+
+def test_apps_onset():
+    from rhinoc.analysis import apps_onset
+
+    assert apps_onset({0: 0.1, 8: 0.4, 16: 0.55, 24: 0.7}) == 16
+    assert apps_onset({0: 0.1, 8: 0.2}) is None
