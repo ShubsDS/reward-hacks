@@ -142,6 +142,7 @@ class GateRun:
     dataset: str
     """Key into `GATE_DATASETS` (files written by scripts/prepare_gate_data.py)."""
     role: str
+    epochs: int = 1
 
 
 GATE_DATASETS = {
@@ -158,9 +159,13 @@ GATE_RUNS: dict[str, GateRun] = {
     "flash-secure": GateRun("flash-secure", RL_MODEL, FLASH_CHAT_RENDERER, "secure", "susceptibility baseline"),
     "flash-sorh": GateRun("flash-sorh", RL_MODEL, FLASH_CHAT_RENDERER, "sorh", "susceptibility"),
     "flash-sorh-control": GateRun("flash-sorh-control", RL_MODEL, FLASH_CHAT_RENDERER, "sorh_control", "susceptibility baseline"),
+    # Exploratory dose check, added after the 1-epoch SoRH pair failed G1 with 30 optimizer
+    # steps and training loss still high. Reported separately; cannot change G1.
+    "flash-sorh-3ep": GateRun("flash-sorh-3ep", RL_MODEL, FLASH_CHAT_RENDERER, "sorh", "exploratory dose", epochs=3),
+    "flash-sorh-control-3ep": GateRun("flash-sorh-control-3ep", RL_MODEL, FLASH_CHAT_RENDERER, "sorh_control", "exploratory dose baseline", epochs=3),
 }
 
-GATE_SFT = dict(learning_rate=1e-4, lora_rank=32, num_epochs=1, batch_size=32, max_length=4096)
+GATE_SFT = dict(learning_rate=1e-4, lora_rank=32, batch_size=32, max_length=4096)
 """LoRA SFT hyperparameters for the gate. Not tuned: if the anchor shows no EM, sweep
 learning rate before concluding anything about Flash."""
 
@@ -169,4 +174,7 @@ GATE_PAIRS = [
     ("flash-insecure", "flash-secure"),
     ("flash-sorh", "flash-sorh-control"),
 ]
-"""(treatment, control) pairs scored by `metrics.gate_passes`."""
+"""(treatment, control) pairs scored by `metrics.gate_passes`; these decide G1."""
+
+EXPLORATORY_PAIRS = [("flash-sorh-3ep", "flash-sorh-control-3ep")]
+"""Scored and reported the same way, but outside G1."""
