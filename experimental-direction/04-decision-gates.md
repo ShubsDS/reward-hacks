@@ -46,9 +46,9 @@ The v1 reserve-run gate (G4) is gone. Both seeds of every arm are committed up f
 | Before spending… | You must have… |
 |---|---|
 | ≈ $39 (Stages 0–1) | A Tinker account, plus Tinker and OpenAI keys in `.env`. **Done.** |
-| ≈ $35 (E1 probe, D3) | D1 smoke with an arm line clean; D2 battery plumbing check clean; T1/T2 built |
+| ≈ $50 (E1 probe, D3) | D1 smoke with an arm line clean; D2 battery plumbing check clean; T1/T2 built |
 | ≈ $690 (six runs and their evals) | `prereg-v1` tagged on the commit that holds `results/e1_validation.json`; a spend guard running on every run |
-| ≈ $160 (Stage 3) | G3 triggered at step 24 |
+| ≈ $140 (Stage 3) | G3 triggered at step 24 |
 
 ## Fallback: no longer needed
 
