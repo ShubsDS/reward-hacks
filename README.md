@@ -5,6 +5,7 @@ A 4-week, one-person, under-$1k project: does inoculation prompting fix the rewa
 | Folder | What's in it |
 |---|---|
 | [`experimental-direction/`](experimental-direction/README.md) | **Start here.** The plan: question, experiments, timeline, budget, decision gates, outcomes |
+| [`results/`](results/01-gate-report.md) | **Week-1 gate report: passed.** Flash can become misaligned; RL ≈ $1.1/step |
 | [`preregistration/`](preregistration/hypotheses.md) | Hypotheses, thresholds and analysis rules, tagged before any RL run |
 | [`src/rhinoc/`](src/rhinoc/) | Run definitions, cost model, metrics, NL grader filter, pipeline patches |
 | [`scripts/`](scripts/) | Setup, data prep, and launchers (dry run unless `--launch`) |
