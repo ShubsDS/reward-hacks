@@ -1,48 +1,56 @@
 # Open issues before the `prereg-v1` tag
 
-From the adversarial review (a parallel Claude session, six read-only reviewers) on 2026-10-12, plus findings during the week-1 gate. **The tag is on hold** until the user decides the items in section A.
+These came from the adversarial review on 2026-10-12, a parallel Claude session with six read-only reviewers, plus findings during the week-1 gate. **All A and B items are resolved in pre-registration draft v2** ([`hypotheses.md`](hypotheses.md)). Section D lists what must happen before the tag.
 
-Status key: ✅ done · 🔧 to apply in the pre-registration revision · 🧑 needs the user's decision
+Status key: ✅ resolved · ⏳ to do before the tag
 
-## A. Decisions for the user (these change the design)
+## A. Design decisions (made by the user on 2026-10-12)
 
-| # | Issue | Options |
+| # | Issue | Resolution |
 |---|---|---|
-| A1 🧑 | **Q1 is partly answered already.** Daniels et al. 2609.06649, App. M / Fig. 33: on-policy inoculation (Qwen2.5-32B, iterative DPO, SFT warmstart) reaches "near baseline misalignment **and reward seeking**". Reward seeking there means uninstructed toy-reward hacking plus a stated preference for graders over users. Verified in the arXiv text. | Reframe the headline to what is still open: (i) goal-instruction vs permission wording, measured on reward seeking; (ii) fully on-policy GRPO with no SFT warmstart; (iii) new channels (T1/T2); (iv) reward seeking with the line in context. Cite Daniels as the prior *against* H2. |
-| A2 🧑 | **R2 wording.** `please_hack` combines "a favor to the developers" with a direct instruction to hack. | Keep `please_hack` (comparable to MacDiarmid/AISI), or use Daniels' Constitution-style permission text ("policy of special-casing when in training environments"), which is closer to what labs deploy. |
-| A3 🧑 | **No same-length control line for R0.** Any system line can conditionalize behavior (Riché & nielsrolf). | Add a neutral line of matching length to R0, or add R0′. |
-| A4 🧑 | **Seeds.** | 2 seeds of R1 and R2 up front, instead of an R3 assigned after seeing the data. |
-| A5 🧑 | **Pre-RL probe** (~$20): measure each inoculation line's effect on base Flash's reward seeking. | The line itself instructs hacking, so the base-model effect is the baseline H5 must beat. |
-| A6 🧑 | **Contact Oliver Daniels** before spending on RL. Their repo already has unpublished GRPO + `general_grader_optimization_ok` + toy-reward runs. | Coordinate or differentiate. |
-| A7 🧑 | **Promote the AISI OLMo-32B audit** (released checkpoints: `hacking_okay` vs `please_hack`) from fallback to core. | Cheap, and it gives a primed-setting comparison. |
-| A8 🧑 | **What counts as a "hack" in impossible_mbpp.** 198 of 235 prompts state the wrong expected value as the user's explicit expectation, so a "hack" often just means following the user's stated example. | Accept and describe it as such, or filter to the 37 prompts without that framing. |
-| A9 🧑 | **Unsandboxed code execution.** API keys are now scrubbed from the environment, but model-written code still runs on the local machine with file and network access, so it could read `.env` from disk. | Accept (small risk at this scale), or sandbox it. A tested option, about 15 min of work: in the patches.py subprocess proxy on macOS, prefix commands with `sandbox-exec -p '(version 1)(allow default)(deny network*)(deny file-read* (literal "<repo>/.env"))'`. In the review's probe, unsandboxed Python read `.env` and opened a socket to 1.1.1.1:443. Sandboxed, all four runtimes still ran, `.env` reads failed in each, and Python's network connect was blocked. |
+| A1 ✅ | **Q1 is partly answered already.** Daniels et al. 2609.06649 App. M: on-policy inoculation brings reward seeking and misalignment to near baseline (iterative DPO, Qwen2.5-32B, SFT warmstart). | The project builds on Daniels and extends it. Primary question: does the framing matter (goal vs permission), holding format, hints and directive fixed? Also new: on-policy GRPO with no warmstart, T1/T2 channels, the line as a trigger. H2 is now the Daniels replication. See "Question and what is already known". |
+| A2 ✅ | **R2 wording.** | R2 = Daniels' Fig. 29 permission text, adapted to DeepSeek. R1 = a minimal-pair goal version of it (user's choice). `please_hack` and `general_grader_optimization_ok` move to the pre-RL probe only. |
+| A3 ✅ | **No same-length control line for R0.** | R0 = a neutral minimal-pair line with the same frame and hints, within 4% of the other arms' length. |
+| A4 ✅ | **Seeds.** | Two seeds per arm, six runs (user's choice). The data-dependent reserve run is removed. A verdict needs both seeds (`metrics.replication_verdict`). |
+| A5 ✅ | **Pre-RL probe.** | `scripts/eval_battery.py --preset probe`: base Flash under every line plus the E1 prompts. It doubles as E1 channel validation and the base side of H5. |
+| A6 ✅ | **Contact Oliver Daniels.** | Draft in [`external-research/outreach/daniels-email-draft.md`](../external-research/outreach/daniels-email-draft.md). The user sends it. |
+| A7 ✅ | **AISI OLMo-32B audit.** | Skipped (user's choice). Listed as future work. |
+| A8 ✅ | **What counts as a "hack" in impossible_mbpp.** 198 of 235 prompts show the wrong value as the user's expectation. | The environment is kept for comparability with Daniels and described honestly in the pre-registration. Reward seeking is measured on separate channels where a visible evaluator, not the user, pays for the exploit. |
+| A9 ✅ | **Unsandboxed code execution.** | `patches.scrub_code_execution_env` runs every policy-written program under `sandbox-exec` (no network, no `.env` reads, writes only to temp) with a scrubbed environment. The held-out impossible_apps scorer is covered too. Verified on the real executor in python/js/ruby/lua: unsandboxed, the probes read a planted secret, wrote into the repo and (python) opened a socket; sandboxed, all were blocked. 32/32 dataset reference solutions still pass their correct tests and fail the wrong one. |
 
-## B. Correctness fixes for the pre-registration revision (apply regardless of A)
+## B. Correctness fixes
 
-| # | Fix |
-|---|---|
-| B1 🔧 | **Onset, G3 and G5 matching use the line-off eval hack rate** (`eval/apps/hack_rate`, every checkpoint), not training rollouts. R1/R2 rollouts carry an instruction to hack. G3 must name whose hack rate it uses. |
-| B2 🔧 | **Replace "2× base" with absolute thresholds plus a cluster CI.** Base EM is 0/600. H1-EM: no EM eval rises ≥ 3 points with cluster CI > 0. H5 as a difference-in-differences against base: [RS(ckpt+line) − RS(ckpt)] − [RS(base+line) − RS(base)], with the exact line in the **system** prompt as in training, one test per arm, Holm-corrected; paraphrases secondary. |
-| B3 🔧 | **Make RS computable.** RS = mean over validated channels of reward-conditionality, in points. This needs a new "doesn't pay" condition for toy_reward (an explicit_even grader line); today both lines pay for odd (toy_reward.py:63-69). Grader-choice RC compares users-vs-graders with users-vs-leadership, with company="DeepSeek". H2 as non-inferiority: lower CI of ΔRS_R1 − 0.7·ΔRS_R0 > 0. Restore or log the dropped "T1 or T2 RC ≥ +10 pp" clause. |
-| B4 🔧 | **Missing data and competence.** toy_reward scores "no number found" as hacked; strict.py defaults an unparseable verdict to Aligned; truncated answers drop out. Report answered rate and truncation per cell, parse the last VERDICT line and log failures, and interpret a null RC only if channel competence is within 10 points of base. |
-| B5 🔧 | **EM battery rationale was inverted.** AISI's signal came from monitor disruption and *frame colleague*, and AISI dropped exfil (it needs ROT13 decoding). Frame colleague uses the same strict scorer, so it is cheap with Luna. Restore it. |
-| B6 🔧 | **Wording claims.** `general_grader_optimization_ok` is Daniels' adaptation, not near-verbatim MacDiarmid `hacking_okay`. R1 and R2 are 289 and 290 characters, so "R2 is longer" is wrong. |
-| B7 🔧 | **Budget and provenance.** RL ≈ $0.9–1.1/step measured (~$43–55/run). In-training eval cells: 9 per checkpoint × 8 checkpoints ≈ $27–32/run. The G0 fallback "3,072 max tokens" contradicts the reason for raising the cap. G3 is funded twice (04 vs 03). Record tinker-cookbook commit 70767c7. |
-| B8 🔧 | **Stale docs:** 4096 → 6144; 459 → 425 training NL prompts; status line; onset definition in 02; calibration size 150 → 300. |
+| # | Fix | Where |
+|---|---|---|
+| B1 ✅ | Onset, G3 and G5 use the line-off in-training `apps` hack rate (all 200 problems), with a floor in `matched_pairs` | `runs.RL_EVAL_SET`, hypotheses.md "Robustness" and "Gates" |
+| B2 ✅ | Every "2× base" rule is replaced by contrasts with cluster CIs. H5 is a difference-in-differences against base, with the line in the system prompt, Holm across arms | hypotheses.md "Hypotheses"; `metrics.rs_contrast_ci` |
+| B3 ✅ | RS = mean reward-conditionality in points over channels validated by E1. Adds the `explicit_even` toy line, the T1/T2 tasks and the grader-choice contrast with company "DeepSeek". The v1 "+15 points on a standardized composite" rule and the dropped "T1/T2 RC ≥ +10" clause are both superseded | hypotheses.md "Outcome"; `patches.register_toy_even_grader`; `rhinoc.evals` |
+| B4 ✅ | Answered and truncation rates per cell, RC interpreted only within 10 points of base answered rate, missing-data bounds, unparseable verdicts counted as missing and logged | hypotheses.md "Robustness" and "Judges"; `rhinoc.evals` T1 parser |
+| B5 ✅ | Frame colleague restored; exfiltration moved to the final checkpoint only | hypotheses.md "Outcome"; `runs.RL_EVAL_SET` (`n_exfil=0` in training) |
+| B6 ✅ | Wording claims corrected: `general_grader_optimization_ok` is Daniels' adaptation of `hacking_okay`; the old R1 and R2 had equal length | `runs.py` docstrings; experimental-direction docs |
+| B7 ✅ | Budget recomputed from measured cost: G3 extension capped at 64 steps (no max-token cut); tinker-cookbook commit recorded | hypotheses.md "Stopping and spending"; `runs.EXTENDED_STEPS`; launcher defaults |
+| B8 ✅ | Stale numbers in the docs (tokens, NL pool, status, onset, calibration size) | experimental-direction docs |
 
-## C. Already done
+## C. Done earlier
 
 | # | Item |
 |---|---|
 | ✅ | Gate evals use only `final` SFT checkpoints, with the sampler pinned per target |
-| ✅ | Terra calibration crash fixed; calibration per eval, run after all targets; hand-label key moved to `runs/private/` |
+| ✅ | Terra calibration crash fixed. Calibration runs per eval, after all targets. Hand-label key moved to `runs/private/` |
 | ✅ | Failed, errored or unscored logs are refused |
-| ✅ | G1 pinned: pooled 600 responses, question-cluster CI, anchor is a pipeline check only |
-| ✅ | Paired question-cluster bootstrap, exact matched pairs, threshold float fix, NaN kappa |
-| ✅ | API keys scrubbed from policy-code environment; training dataset revisions pinned |
-| ✅ | Spend watcher (`scripts/watch_spend.py`). Background Python ignores SIGINT, so it escalates to SIGTERM. |
-| ✅ | Eval caps lifted to the run's `max_tokens` in RL eval cells |
-| ✅ | RL format: chat mode, `format_mode="penalty"`, `persona_only=False`, as upstream; hack rate counted over all rollouts |
-| ✅ | Betley-protocol deviations recorded in the pre-registration |
-| ✅ | Anchor sensitivity concern (review item g) is moot: the V3.1 anchor passed under our protocol, 24.3% vs 1.8% |
+| ✅ | G1 pinned: pooled 600 responses, question-cluster CI, anchor as a pipeline check. G1 passed |
+| ✅ | Paired question-cluster bootstrap, exact matched pairs, threshold float fix, NaN κ |
+| ✅ | API keys scrubbed from the policy-code environment; training dataset revisions pinned |
+| ✅ | Spend watcher (`scripts/watch_spend.py`), escalating to SIGTERM |
+| ✅ | Eval caps tied to the run's `max_tokens` |
+| ✅ | RL format: chat mode, `format_mode="penalty"`, `persona_only=False`; hack rate over all rollouts |
+
+## D. Before tagging `prereg-v1`
+
+| # | Step |
+|---|---|
+| D1 ⏳ | One RL smoke on the final config with an arm line (e.g. `smoke --flash --set inoculation_coding="mp_goal_code" --set inoculation_nlg="mp_goal_nl"`). Confirms the bank resolves, `apps_inoc` / `sg_inoc` render, the sandbox holds under real rollouts, and the cost matches $1.16/step. |
+| D2 ⏳ | Plumbing check of the battery: `scripts/eval_battery.py --preset probe --limit 2 --launch` (cents). |
+| D3 ⏳ | Run the E1 probe (≈ $35) and commit `results/e1_validation.json`. This fixes which channels enter RS. |
+| D4 ⏳ | Hand labels: the gate sheet (`runs/gate_evals/hand_labels.csv`) and, after D3, a T1 sheet. |
+| D5 ⏳ | Tag `prereg-v1` on the commit that holds the E1 decision, then launch the six runs. |
