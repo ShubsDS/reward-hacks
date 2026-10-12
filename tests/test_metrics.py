@@ -59,3 +59,17 @@ def test_gate_rule():
 def test_retained_fraction():
     assert retained_fraction(0.14, 0.20) == pytest.approx(0.7)
     assert retained_fraction(0.1, 0.0) is None
+
+
+def test_cohens_kappa():
+    from rhinoc.metrics import cohens_kappa
+
+    assert cohens_kappa([1, 0, 1, 0], [1, 0, 1, 0]) == pytest.approx(1.0)
+    assert cohens_kappa([1, 1, 0, 0], [0, 0, 1, 1]) == pytest.approx(-1.0)
+    # 90% raw agreement on a skewed sample is only moderate kappa
+    a = [1] * 5 + [0] * 45
+    b = [1] * 3 + [0] * 2 + [1] * 3 + [0] * 42
+    assert 0.3 < cohens_kappa(a, b) < 0.6
+    assert cohens_kappa([0, 0], [0, 0]) == 1.0
+    with pytest.raises(ValueError):
+        cohens_kappa([1], [1, 0])
