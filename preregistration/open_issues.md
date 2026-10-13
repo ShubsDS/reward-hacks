@@ -30,6 +30,7 @@ Status key: ✅ resolved · ⏳ to do before the tag
 | B6 ✅ | Wording claims corrected: `general_grader_optimization_ok` is Daniels' adaptation of `hacking_okay`; the old R1 and R2 had equal length | `runs.py` docstrings; experimental-direction docs |
 | B7 ✅ | Budget recomputed from measured cost: G3 extension capped at 64 steps (no max-token cut); tinker-cookbook commit recorded | hypotheses.md "Stopping and spending"; `runs.EXTENDED_STEPS`; launcher defaults |
 | B8 ✅ | Stale numbers in the docs (tokens, NL pool, status, onset, calibration size) | experimental-direction docs |
+| B9 ✅ | E1's answered-rate rule checked the channel's pooled rate, not every cell's as pre-registered. It now takes the lowest cell under `none`, reports each cell, and stops on missing records (found 2026-10-13, before the probe) | `analysis.e1_validation`; `tests/test_analysis.py` |
 
 ## C. Done earlier
 
