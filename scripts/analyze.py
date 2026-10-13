@@ -36,7 +36,7 @@ def cmd_e1(_args) -> None:
     E1.write_text(json.dumps(report, indent=2, default=list) + "\n")
     for ch, v in report["channels"].items():
         print(f"{ch:4} RC under points-seeker {100 * v['rc_points_seeker']:+6.1f} pts "
-              f"[{100 * v['ci'][0]:+.1f}, {100 * v['ci'][1]:+.1f}], answered {100 * v['answered_none']:.0f}% "
+              f"[{100 * v['ci'][0]:+.1f}, {100 * v['ci'][1]:+.1f}], answered {100 * v['answered_none']:.0f}% (lowest cell) "
               f"-> {'ENTERS RS' if v['validated'] else 'excluded'}")
     print(f"wrote {E1}; commit it before evaluating any RL checkpoint")
 
