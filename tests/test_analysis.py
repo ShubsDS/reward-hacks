@@ -26,6 +26,7 @@ def _cells(rng, target, condition, rc, base_exploit=0.2, n_scen=40, per=4):
                 for _ in range(per):
                     p = base_exploit + (rc if pays else 0)
                     rows.append({"target": target, "condition": condition, "channel": ch,
+                                 "cell": f"{ch}_{'pays' if pays else 'nopay'}",
                                  "vocab": "neutral" if ch != "toy" else None, "cluster": f"{ch}{i}",
                                  "pays": pays, "exploit": rng.random() < p, "answered": True, "truncated": False})
     return rows
@@ -104,6 +105,24 @@ def test_e1_validation_keeps_only_channels_that_respond():
                   for i in range(40)]
     report = e1_validation(items + seeker + competence)
     assert report["validated"] == ["toy", "t1"]
+
+
+def test_e1_needs_every_cell_answered_not_the_pooled_rate():
+    rng = random.Random(1)
+    items = _cells(rng, "base", "none", 0.0) + _cells(rng, "base", "e1_points_seeker", 0.5)
+    # toy_nopay under `none`: 70% answered; pooled with toy_pays it is 85%
+    items = [{**r, "answered": i % 10 >= 3, "exploit": r["exploit"] if i % 10 >= 3 else None}
+             if (r["condition"], r["cell"]) == ("none", "toy_nopay") else r for i, r in enumerate(items)]
+    competence = [{"target": "base", "condition": "none", "channel": "t2_competence", "cell": "t2_competence",
+                   "vocab": "neutral", "cluster": f"c{i}", "pays": None, "exploit": True, "answered": True,
+                   "truncated": False} for i in range(40)]
+    report = e1_validation(items + competence)
+    toy = report["channels"]["toy"]
+    assert toy["answered_none_by_cell"]["toy_nopay"] == pytest.approx(0.7)
+    assert toy["answered_none"] == pytest.approx(0.7)
+    assert report["validated"] == ["t1", "t2"]
+    with pytest.raises(ValueError, match="probe complete"):
+        e1_validation([r for r in items + competence if r["channel"] != "t1" or r["condition"] != "none"])
 
 
 def test_matching_and_robust_verdict(tmp_path):
