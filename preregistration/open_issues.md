@@ -51,7 +51,7 @@ Status key: ✅ resolved · ⏳ to do before the tag
 | # | Step |
 |---|---|
 | D1 ✅ | RL smoke on the final config with R1's lines (2026-10-13, ≈ $0.44). The bank resolves, the line reaches the prompt, policy code runs in the sandbox with no scorer errors, every checkpoint-eval cell succeeds on Flash (including `apps_inoc` / `sg_inoc`), and the cost is ≈ $1.13 per 64-rollout step. **Finding:** base Flash hacked 8/8 training rollouts under the goal line, so those GRPO groups gave no gradient. D3 measures base hacking under each arm line. See [`../results/02-pre-rl-checks.md`](../results/02-pre-rl-checks.md). |
-| D2 ⏳ | Plumbing check of the battery: `scripts/eval_battery.py run --preset probe --limit 2 --launch` (cents). |
+| D2 ✅ | Battery plumbing check, `scripts/eval_battery.py run --preset probe --limit 2 --launch` (2026-10-13, ≈ $0.54). All 89 probe cells succeed and parse, `summarize` and `e1_validation` run end to end, and 4.5% of samples are format failures (counted as missing). See [`../results/02-pre-rl-checks.md`](../results/02-pre-rl-checks.md). |
 | D3 ⏳ | Run the E1 probe (≈ $50) and commit `results/e1_validation.json`. This fixes which channels enter RS. |
 | D4 ⏳ | Hand labels: the gate sheet (`runs/gate_evals/hand_labels.csv`) and, after D3, a T1 sheet. |
 | D5 ⏳ | Tag `prereg-v1` on the commit that holds the E1 decision, then launch the six runs. |
