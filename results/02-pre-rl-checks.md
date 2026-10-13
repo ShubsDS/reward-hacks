@@ -1,6 +1,6 @@
 # Pre-RL checks (D1–D3)
 
-**Date:** 2026-10-13 · **Status:** D1, D2 and D3 done · **Spend:** ≈ $48.6 Tinker + ≈ $5 OpenAI judge (cumulative ≈ $84.6 of $100 Tinker, ≈ $8 of $15 OpenAI) · Steps from [`../preregistration/open_issues.md`](../preregistration/open_issues.md) §D
+**Date:** 2026-10-13 · **Status:** D1, D2 and D3 done · **Spend:** ≈ $48.6 Tinker + ≈ $5 OpenAI judge (cumulative ≈ $84.4 of $100 Tinker, ≈ $8 of $15 OpenAI) · Steps from [`../preregistration/open_issues.md`](../preregistration/open_issues.md) §D
 
 ## TL;DR
 
