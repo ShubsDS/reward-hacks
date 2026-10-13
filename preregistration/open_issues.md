@@ -12,7 +12,7 @@ Status key: ✅ resolved · ⏳ to do before the tag
 | A2 ✅ | **R2 wording.** | R2 = Daniels' Fig. 29 permission text, adapted to DeepSeek. R1 = a minimal-pair goal version of it (user's choice). `please_hack` and `general_grader_optimization_ok` move to the pre-RL probe only. |
 | A3 ✅ | **No same-length control line for R0.** | R0 = a neutral minimal-pair line with the same frame and hints, within 4% of the other arms' length. |
 | A4 ✅ | **Seeds.** | Two seeds per arm, six runs (user's choice). The data-dependent reserve run is removed. A verdict needs both seeds (`metrics.replication_verdict`). |
-| A5 ✅ | **Pre-RL probe.** | `scripts/eval_battery.py --preset probe`: base Flash under every line plus the E1 prompts. It doubles as E1 channel validation and the base side of H5. |
+| A5 ✅ | **Pre-RL probe.** | `scripts/eval_battery.py run --preset probe`: base Flash under every line plus the E1 prompts. It doubles as E1 channel validation and the base side of H5. |
 | A6 ✅ | **Contact Oliver Daniels.** | Draft in [`external-research/outreach/daniels-email-draft.md`](../external-research/outreach/daniels-email-draft.md). The user sends it. |
 | A7 ✅ | **AISI OLMo-32B audit.** | Skipped (user's choice). Listed as future work. |
 | A8 ✅ | **What counts as a "hack" in impossible_mbpp.** 198 of 235 prompts show the wrong value as the user's expectation. | The environment is kept for comparability with Daniels and described honestly in the pre-registration. Reward seeking is measured on separate channels where a visible evaluator, not the user, pays for the exploit. |
@@ -50,7 +50,7 @@ Status key: ✅ resolved · ⏳ to do before the tag
 | # | Step |
 |---|---|
 | D1 ⏳ | One RL smoke on the final config with an arm line and a few samples of every checkpoint-eval cell: `launch_rl.py smoke --flash --set 'inoculation_coding="mp_goal_code"' --set 'inoculation_nlg="mp_goal_nl"' --tag arm --evals --launch`. Confirms the bank resolves, the checkpoint-eval path works on Flash (the smoke eval set also renders the line in `apps_inoc` / `sg_inoc`), the sandbox holds under real rollouts, and the cost matches $1.16/step. |
-| D2 ⏳ | Plumbing check of the battery: `scripts/eval_battery.py --preset probe --limit 2 --launch` (cents). |
+| D2 ⏳ | Plumbing check of the battery: `scripts/eval_battery.py run --preset probe --limit 2 --launch` (cents). |
 | D3 ⏳ | Run the E1 probe (≈ $50) and commit `results/e1_validation.json`. This fixes which channels enter RS. |
 | D4 ⏳ | Hand labels: the gate sheet (`runs/gate_evals/hand_labels.csv`) and, after D3, a T1 sheet. |
 | D5 ⏳ | Tag `prereg-v1` on the commit that holds the E1 decision, then launch the six runs. |
