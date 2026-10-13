@@ -66,7 +66,7 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 | Hand labels | Pending (user). `runs/gate_evals/hand_labels.csv`, 80 blind items |
 | D1 RL smoke on the final config | **Done, passed** (2026-10-13). Finding: base Flash hacks 8/8 training rollouts under the goal line. `results/02-pre-rl-checks.md` |
 | D2 battery plumbing | **Done, passed** (2026-10-13). All 89 probe cells run and parse. E1 now checks every cell's answered rate (B9) |
-| E1 probe (D3) | **Running** (approved by the user 2026-10-13). Log `runs/logs/battery_probe.log`, output `runs/battery/` |
+| E1 probe (D3) | **Done** (2026-10-13). RS = toy + T2; T1 excluded. Frozen in `results/e1_validation.json` at `56d9a5c`. Base RS ≈ 31 pts with no line. `results/02-pre-rl-checks.md` |
 | RL runs, checkpoint battery | Code written and tested (158 tests pass). Not launched |
 | Email to Oliver Daniels | Draft only: `external-research/outreach/daniels-email-draft.md`. **Not sent.** Sending is the user's action. |
 
@@ -93,8 +93,8 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 
 | | Spent so far | Initial cap |
 |---|---|---|
-| Tinker | ≈ $37: SFT $30.38, eval sampling $3.90, RL smokes $1.57, D1 $0.44, D2 $0.54. D3 running (≈ $40 expected) | $100 |
-| OpenAI (judges) | ≈ $3 | $15 |
+| Tinker | **≈ $84.4**: SFT $30.38, eval sampling $3.90, RL smokes $1.57, D1 $0.44, D2 $0.54, D3 $47.59 | $100 |
+| OpenAI (judges) | ≈ $8: gate ≈ $3, D3 ≈ $5 (5,120 Luna calls at the $0.001 planning rate; check the dashboard) | $15 |
 
 Forward budget (`experimental-direction/03-timeline-and-budget.md`):
 
@@ -135,7 +135,9 @@ caffeinate -i .venv/bin/python scripts/launch_rl.py smoke --flash --set 'inocula
 
 (`open_issues.md` writes this without `run`; the CLI needs the `run` subcommand.) Then `scripts/eval_battery.py summarize`.
 
-### D3: E1 probe on base Flash (≈ $50)
+### D3: E1 probe on base Flash ($47.59 + ≈ $5 judge)
+
+**Done 2026-10-13.** E1 is frozen; don't re-run `analyze.py e1`. The commands are kept for the record.
 
 ```bash
 .venv/bin/python scripts/eval_battery.py run --preset probe
@@ -156,7 +158,7 @@ caffeinate -i .venv/bin/python scripts/eval_battery.py run --preset probe --laun
 ### D4: hand labels (the user's job)
 
 - The gate sheet `runs/gate_evals/hand_labels.csv`: put `M` or `A` in the last column. Then `.venv/bin/python scripts/eval_gate.py summarize` reports Luna-vs-hand κ.
-- After D3, the T1 sheet comes from `scripts/eval_battery.py labels`.
+- The T1 sheet comes from `scripts/eval_battery.py labels --launch`. **It is not written yet.** It never overwrites, so writing it now fixes it to 40 base-only items. T1 is outside RS after E1; ask the user whether to write it now or after the RL battery.
 - The answer key lives in `runs/private/`. Don't show it to the user while they label.
 
 ### D5: tag and launch the six runs (bulk of the budget; needs the money)
