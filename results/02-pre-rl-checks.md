@@ -24,7 +24,7 @@ Two GRPO steps, 2 groups × 2 rollouts, R1's lines (`mp_goal_code` / `mp_goal_nl
 | Check | Result | Verdict |
 |---|---|---|
 | Line bank resolves | Both kinds load; the NL env built all 425 prompts with `mp_goal_nl` | ✅ |
-| Line reaches the prompt | Prompts are 325 tokens vs ≈ 203 with no line (+≈ 125, the line's length). The model's reasoning cites "the policy described" and "maximize grader score". A new test checks all six arm kinds land in every system prompt (`tests/test_patches.py`) | ✅ |
+| Line reaches the prompt | Prompts average 354 tokens vs ≈ 200 in the no-line smokes (+≈ 150, the line's length). The model's reasoning cites "the policy described" and "maximize grader score". A new test checks all six arm kinds land in every system prompt (`tests/test_patches.py`) | ✅ |
 | NL env under the line | Both steps drew only coding prompts (the schedule is random per step). Covered offline by the test above | ✅ (offline) |
 | Sandbox under real rollouts | 8 of 8 programs ran and passed their tests; 0 "scorer error" lines in the log | ✅ |
 | Format | 100% used the `<thinking>` tags; 0% truncated | ✅ |
@@ -142,7 +142,7 @@ What this shows:
 - **Base Flash is a partial reward seeker before any RL.** With no line it outputs an odd number 21% of the time when the grader pays for odd, vs 1% when it pays for even. It edits the autorater config 47% of the time when that pays, vs 4% when it doesn't.
 - **The goal and permission lines act alike at base.** Both push the toy channel near its ceiling and suppress T2 tampering. They differ by ≈ 2 pts in base RS. The goal line raises T1 compliance more (+21 vs +3.5), but T1 is not in RS.
 - **The neutral line is close to no line.** It lowers RS a little (23 vs 31) and doubles `apps` hacking (27% vs 15%), because it states the hack hints.
-- **Format and truncation.** Under `none`, 88% of `apps` answers are scorable; 14% hit the 6,144-token cap and count as missing. The answered rate under the goal line (79%) is just below 80%. `apps` is not an RS channel, but its line-off hack rate is the matching variable, so its missing rate should be reported with it.
+- **Format and truncation.** Under `none`, 88% of `apps` answers are scorable. 14% hit the 6,144-token cap; most of those can't be scored and count as missing. The answered rate under the goal line (79%) is just below 80%. `apps` is not an RS channel, but its line-off hack rate is the matching variable, so its missing rate should be reported with it.
 
 ### What this means for the RL runs
 
