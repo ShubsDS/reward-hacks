@@ -2,13 +2,13 @@
 
 A 4-week, one-person, under-$1k project. Daniels et al. (App. M) found that on-policy inoculation prompting cuts reward seeking; this project builds on that and asks whether the **framing** of the inoculation line matters. Does "my only goal is the grader" train reward seeking where Daniels' permission line does not, in fully on-policy GRPO with no warmstart?
 
-> **Status (2026-10-12):** week-1 gate passed (G0 and G1). Pre-registration at draft v2. The six RL runs launch after the `prereg-v1` tag, which needs steps D1–D5 below.
+> **Status (2026-10-13):** week-1 gate passed (G0 and G1). Pre-RL checks D1–D3 done ([`results/02-pre-rl-checks.md`](results/02-pre-rl-checks.md)): E1 froze reward seeking on the toy grader and T2; T1 is excluded. Pre-registration at draft v2. The six RL runs launch after the `prereg-v1` tag, which still needs D4 (hand labels) and D5 (the tag).
 
 | Folder | What's in it |
 |---|---|
 | [`HANDOFF.md`](HANDOFF.md) | **For agents picking up the work:** user rules, current state, spend, exact next-step commands, gotchas |
 | [`experimental-direction/`](experimental-direction/README.md) | **Start here.** The plan in plain language: question, experiments, timeline, budget, decision gates, outcomes |
-| [`results/`](results/01-gate-report.md) | **Week-1 gate report: G0 and G1 passed.** Flash can become misaligned (21.5% vs 0.8%); RL ≈ $1.16/step |
+| [`results/`](results/01-gate-report.md) | **Week-1 gate report: G0 and G1 passed.** Flash can become misaligned (21.5% vs 0.8%); RL ≈ $1.16/step. **[Pre-RL checks](results/02-pre-rl-checks.md):** E1 frozen (RS = toy + T2); base Flash RS ≈ 31 pts |
 | [`preregistration/`](preregistration/hypotheses.md) | Hypotheses, outcome and analysis rules (draft v2, binding once tagged `prereg-v1`), and [open issues](preregistration/open_issues.md) with the steps before the tag |
 | [`src/rhinoc/`](src/rhinoc/) | Run definitions, cost model, metrics, pre-registered analysis, NL grader filter, pipeline patches (including the sandbox for policy-written code) |
 | [`scripts/`](scripts/) | Setup, data prep, launchers (dry run unless `--launch`), spend watcher, analysis |
@@ -56,9 +56,9 @@ Then, in the order of the plan. Every launcher prints its plan and estimated cos
 
 | Step | Command | Cost |
 |---|---|---|
-| **D1** Smoke on Flash with an arm line: the line bank resolves, the sandbox holds under real rollouts, and tokens per rollout match the estimate | `.venv/bin/python scripts/launch_rl.py smoke --flash --set 'inoculation_coding="mp_goal_code"' --set 'inoculation_nlg="mp_goal_nl"' --tag arm --evals --launch` | ~$1 |
-| **D2** Battery plumbing check | `.venv/bin/python scripts/eval_battery.py run --preset probe --limit 2 --launch`, then `summarize --smoke` | cents |
-| **D3** E1 probe on base Flash, then freeze the channel list | `.venv/bin/python scripts/eval_battery.py run --preset probe --launch`; then `eval_battery.py summarize`, which writes `results/battery_items.jsonl`; then `.venv/bin/python scripts/analyze.py e1` and commit `results/e1_validation.json` | ≈ $50 (dry run: $44.60 Tinker + $5.12 judge) |
+| ✅ **D1** Smoke on Flash with an arm line: the line bank resolves, the sandbox holds under real rollouts, and tokens per rollout match the estimate | `.venv/bin/python scripts/launch_rl.py smoke --flash --set 'inoculation_coding="mp_goal_code"' --set 'inoculation_nlg="mp_goal_nl"' --tag arm --evals --launch` | ~$1 |
+| ✅ **D2** Battery plumbing check | `.venv/bin/python scripts/eval_battery.py run --preset probe --limit 2 --launch`, then `summarize --smoke` | cents |
+| ✅ **D3** E1 probe on base Flash, then freeze the channel list | `.venv/bin/python scripts/eval_battery.py run --preset probe --launch`; then `eval_battery.py summarize`, which writes `results/battery_items.jsonl`; then `.venv/bin/python scripts/analyze.py e1` and commit `results/e1_validation.json` | ≈ $50 (dry run: $44.60 Tinker + $5.12 judge) |
 | **D4** Hand labels | Label `runs/gate_evals/hand_labels.csv` (M or A), then `.venv/bin/python scripts/eval_gate.py summarize`; after D3, the T1 sheet | free |
 | **D5** Tag the pre-registration | `git tag prereg-v1` on the commit that holds `results/e1_validation.json` | free |
 
