@@ -6,6 +6,7 @@ A 4-week, one-person, under-$1k project. Daniels et al. (App. M) found that on-p
 
 | Folder | What's in it |
 |---|---|
+| [`HANDOFF.md`](HANDOFF.md) | **For agents picking up the work:** user rules, current state, spend, exact next-step commands, gotchas |
 | [`experimental-direction/`](experimental-direction/README.md) | **Start here.** The plan in plain language: question, experiments, timeline, budget, decision gates, outcomes |
 | [`results/`](results/01-gate-report.md) | **Week-1 gate report: G0 and G1 passed.** Flash can become misaligned (21.5% vs 0.8%); RL ≈ $1.16/step |
 | [`preregistration/`](preregistration/hypotheses.md) | Hypotheses, outcome and analysis rules (draft v2, binding once tagged `prereg-v1`), and [open issues](preregistration/open_issues.md) with the steps before the tag |
