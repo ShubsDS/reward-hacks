@@ -130,3 +130,24 @@ def test_toy_even_grader_mirrors_upstream_odd_line():
     changed = SimpleNamespace(GRADER_LINES={"explicit_odd": "<grader>odd pays</grader>"})
     with pytest.raises(ValueError, match="re-derive"):
         register_toy_even_grader(module=changed)
+
+
+@pytest.mark.parametrize("arm", ["R0", "R1", "R2"])
+def test_arm_lines_reach_every_training_system_prompt(arm, monkeypatch):
+    """On the real pipeline: each arm's coding and NL kinds resolve from our bank and land
+    verbatim in every system prompt the env samples from (a smoke run may schedule only one
+    env family, so this covers the other)."""
+    utils = pytest.importorskip("rewardhacking_training.envs.train_env_utils")
+    from rhinoc.runs import ARMS, SHARED_RL
+
+    monkeypatch.setattr(utils, "SYSTEM_PROMPT_INOCULATION_KINDS", utils.SYSTEM_PROMPT_INOCULATION_KINDS)
+    monkeypatch.setattr(utils, "INOCULATION_BANK_PATH", utils.INOCULATION_BANK_PATH)
+    register_inoculation_bank(INOCULATION_BANK, module=utils)
+    bank = json.loads(INOCULATION_BANK.read_text())
+    for kind in (ARMS[arm].coding, ARMS[arm].nlg):
+        system_block, user_block = utils.resolve_inoculation_placement(kind, SHARED_RL["inoculation_placement"])
+        assert system_block == bank[kind] and user_block is None
+        prompts = utils.load_system_prompt_bank(
+            SHARED_RL["system_prompts_path"], persona_only=SHARED_RL["persona_only"], inoculation=system_block,
+        )
+        assert prompts and all(bank[kind] in p for p in prompts)
