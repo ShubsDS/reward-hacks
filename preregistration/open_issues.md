@@ -49,7 +49,7 @@ Status key: ✅ resolved · ⏳ to do before the tag
 
 | # | Step |
 |---|---|
-| D1 ⏳ | One RL smoke on the final config with an arm line and a few samples of every checkpoint-eval cell: `launch_rl.py smoke --flash --set 'inoculation_coding="mp_goal_code"' --set 'inoculation_nlg="mp_goal_nl"' --tag arm --evals --launch`. Confirms the bank resolves, the checkpoint-eval path works on Flash (the smoke eval set also renders the line in `apps_inoc` / `sg_inoc`), the sandbox holds under real rollouts, and the cost matches $1.16/step. |
+| D1 ✅ | RL smoke on the final config with R1's lines (2026-10-13, ≈ $0.44). The bank resolves, the line reaches the prompt, policy code runs in the sandbox with no scorer errors, every checkpoint-eval cell succeeds on Flash (including `apps_inoc` / `sg_inoc`), and the cost is ≈ $1.13 per 64-rollout step. **Finding:** base Flash hacked 8/8 training rollouts under the goal line, so those GRPO groups gave no gradient. D3 measures base hacking under each arm line. See [`../results/02-pre-rl-checks.md`](../results/02-pre-rl-checks.md). |
 | D2 ⏳ | Plumbing check of the battery: `scripts/eval_battery.py run --preset probe --limit 2 --launch` (cents). |
 | D3 ⏳ | Run the E1 probe (≈ $50) and commit `results/e1_validation.json`. This fixes which channels enter RS. |
 | D4 ⏳ | Hand labels: the gate sheet (`runs/gate_evals/hand_labels.csv`) and, after D3, a T1 sheet. |
