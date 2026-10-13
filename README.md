@@ -57,8 +57,8 @@ Then, in the order of the plan. Every launcher prints its plan and estimated cos
 | Step | Command | Cost |
 |---|---|---|
 | **D1** Smoke on Flash with an arm line: the line bank resolves, the sandbox holds under real rollouts, and tokens per rollout match the estimate | `.venv/bin/python scripts/launch_rl.py smoke --flash --set 'inoculation_coding="mp_goal_code"' --set 'inoculation_nlg="mp_goal_nl"' --tag arm --evals --launch` | ~$1 |
-| **D2** Battery plumbing check | `.venv/bin/python scripts/eval_battery.py --preset probe --limit 2 --launch` | cents |
-| **D3** E1 probe on base Flash, then freeze the channel list | `.venv/bin/python scripts/eval_battery.py --preset probe --launch`; summarize its records into `results/battery_items.jsonl`; then `.venv/bin/python scripts/analyze.py e1` and commit `results/e1_validation.json` | ~$35 |
+| **D2** Battery plumbing check | `.venv/bin/python scripts/eval_battery.py run --preset probe --limit 2 --launch`, then `summarize --smoke` | cents |
+| **D3** E1 probe on base Flash, then freeze the channel list | `.venv/bin/python scripts/eval_battery.py run --preset probe --launch`; then `eval_battery.py summarize`, which writes `results/battery_items.jsonl`; then `.venv/bin/python scripts/analyze.py e1` and commit `results/e1_validation.json` | ≈ $50 (dry run: $44.60 Tinker + $5.12 judge) |
 | **D4** Hand labels | Label `runs/gate_evals/hand_labels.csv` (M or A), then `.venv/bin/python scripts/eval_gate.py summarize`; after D3, the T1 sheet | free |
 | **D5** Tag the pre-registration | `git tag prereg-v1` on the commit that holds `results/e1_validation.json` | free |
 
@@ -69,8 +69,8 @@ Then, in the order of the plan. Every launcher prints its plan and estimated cos
 | Six RL runs | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0-s0 --launch` (then `R1-s0`, `R2-s0`, `R0-s1`, `R1-s1`, `R2-s1`) | ≈ $76 each, with in-training evals |
 | Spend guard, alongside every run | `.venv/bin/python scripts/watch_spend.py runs/rl/R0-s0 --pid <launcher python PID> --estimate 1.16 --budget 90 --eval-cost 2.5` | free |
 | Gate G3, only if the seed-0 runs' line-off `apps` hack rate at step 24 is below max(0.20, base + 0.10) | `launch_rl.py <run> --extended --launch` for **all six** runs (resumes; trains to 64 steps); watcher `--budget 130` | ≈ +$160 in all |
-| Reward-seeking battery at steps 16 and 32 (and base) | `.venv/bin/python scripts/eval_battery.py --preset checkpoint --launch` | ≈ $78 for the 12 checkpoints |
-| Final checkpoint (48, or 64 after G3): battery, misalignment evals, trigger condition | `.venv/bin/python scripts/eval_battery.py --preset final --launch` | ≈ $140 for the six finals plus base misalignment evals |
+| Reward-seeking battery at steps 16 and 32 (and base) | `.venv/bin/python scripts/eval_battery.py run --preset checkpoint --targets R0-s0,R1-s0,R2-s0,R0-s1,R1-s1,R2-s1 --launch` | ≈ $78 for the 12 checkpoints |
+| Final checkpoint (48, or 64 after G3): battery, misalignment evals, trigger condition | `.venv/bin/python scripts/eval_battery.py run --preset final --targets base,R0-s0,R1-s0,R2-s0,R0-s1,R1-s1,R2-s1 --launch` | ≈ $140 for the six finals plus base misalignment evals |
 | Hypothesis tests (H1–H7, matching, robustness) | `.venv/bin/python scripts/analyze.py hypotheses` | free |
 
 **Built and tested offline:**
