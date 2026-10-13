@@ -64,7 +64,8 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 | Adversarial review | Done. A parallel Claude session reviewed the repo; all fixes are merged into `main` |
 | Pre-registration | **Draft v2, not tagged.** Becomes binding at tag `prereg-v1` (step D5) |
 | Hand labels | Pending (user). `runs/gate_evals/hand_labels.csv`, 80 blind items |
-| E1 probe, RL runs, battery, analysis | Code written and tested (154 tests pass). **Nothing launched.** |
+| D1 RL smoke on the final config | **Done, passed** (2026-10-13). Finding: base Flash hacks 8/8 training rollouts under the goal line. `results/02-pre-rl-checks.md` |
+| E1 probe, RL runs, battery, analysis | Code written and tested (157 tests pass). D2 (battery plumbing) and D3 (E1 probe) approved by the user on 2026-10-13. RL runs not launched. |
 | Email to Oliver Daniels | Draft only: `external-research/outreach/daniels-email-draft.md`. **Not sent.** Sending is the user's action. |
 
 ### Gate results (`results/01-gate-report.md`, `results/gate_summary.json`)
@@ -90,7 +91,7 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 
 | | Spent so far | Initial cap |
 |---|---|---|
-| Tinker | ≈ $36: SFT $30.38, eval sampling $3.90, RL smokes $1.57 | $100 |
+| Tinker | ≈ $36.5: SFT $30.38, eval sampling $3.90, RL smokes $1.57, D1 $0.44 | $100 |
 | OpenAI (judges) | ≈ $3 | $15 |
 
 Forward budget (`experimental-direction/03-timeline-and-budget.md`):
@@ -122,7 +123,7 @@ caffeinate -i .venv/bin/python scripts/launch_rl.py smoke --flash --set 'inocula
 - the `sandbox-exec` sandbox holds under real rollouts (no scorer errors);
 - the cost per step is near $1.16.
 
-**Check:** `runs/rl/smoke-flash-arm/tinker_log/metrics.jsonl`. Look for `env/all/scorer_error` = 0, the format rate, truncation, and tokens per turn. `grep -c "scorer error"` on the log should be 0.
+**Done 2026-10-13, passed** (`results/02-pre-rl-checks.md`). The pipeline has no `env/all/scorer_error` metric: check `grep -c "scorer error"` on the log (0), plus `env/all/has_code`, `frac_passed`, `format` and `truncated` in `tinker_log/metrics.jsonl`.
 
 ### D2: battery plumbing (cents)
 
