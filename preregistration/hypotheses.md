@@ -1,6 +1,6 @@
 # Pre-registration: Does the wording of an inoculation decide whether RL trains a reward seeker?
 
-**Status:** draft v2, 2026-10-12. Becomes binding when tagged `prereg-v1`, before any RL run launches. After that, every change goes in the deviations log at the bottom with a date and a reason. What changed from the v1 draft, and why, is in the [revision history](#revision-history).
+**Status:** draft v2, 2026-10-12; budget and checkpoint rules updated 2026-11-02. Becomes binding when tagged `prereg-v1`, before any RL run launches. After that, every change goes in the deviations log at the bottom with a date and a reason. What changed from the v1 draft, and why, is in the [revision history](#revision-history).
 
 Background and plain-language plan: [`experimental-direction/`](../experimental-direction/README.md). Machine-readable definitions: [`src/rhinoc/runs.py`](../src/rhinoc/runs.py). Exact line texts: [`config/inoculation_prompts.json`](../config/inoculation_prompts.json) (sha256 `2081d347…31f5` at this draft). Analysis code, committed and tested on synthetic data before the tag: [`src/rhinoc/analysis.py`](../src/rhinoc/analysis.py) and [`src/rhinoc/metrics.py`](../src/rhinoc/metrics.py), run by `scripts/analyze.py e1` (freezes the E1 channels) and `scripts/analyze.py hypotheses`.
 
@@ -188,19 +188,29 @@ The same probe gives:
 
 - **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16 --eval-cost 2.5` and a 1.5× trailing-3-step trigger. Per-run caps, training plus in-training evals: `--budget 90` at 48 steps, `--budget 115` at 64 steps.
 - **No early stopping on outcomes.** A crashed run resumes from its last checkpoint.
+- **Checkpoint storage.** Tinker bills $0.10 per GiB-month until a checkpoint is deleted. The per-run caps above don't include it.
+  - A full save is ≈ 52 GiB: a 12.9 GiB sampler plus ≈ 39 GiB of training state, measured from D1's billing.
+  - Billing history shows the RL smoke saves did not expire on their own, so RL saves are assumed to stay until deleted.
+  - Each 48-step run makes 7 saves (steps 8–48 plus `final`). Six runs hold ≈ 2,176 GiB, ≈ $218 a month. At 64 steps: 9 saves, ≈ 2,797 GiB, ≈ $280 a month.
+- **Checkpoint pruning.** The same rule applies to all six runs, at the same time. It depends only on these milestones, never on results.
+  - Nothing is deleted until all six runs have finished (which also settles G3) and every battery cell at steps 16, 32 and final has succeeded. Resuming needs the training state, and the batteries need the samplers.
+  - Then delete all training state, the duplicate `final` samplers, and every sampler except steps 16, 32 and the last periodic step (48, or 64 after G3). The final battery serves that periodic sampler, not the `final` record. This leaves ≈ 232 GiB, ≈ $23 a month.
+  - The remaining samplers stay until the analysis and write-up are done. After pruning, battery cells can still be re-run, but training can't be resumed.
 - **Budget** (cap $1,000):
 
 | Item | Estimate |
 |---|---|
-| Spent through G1 | ≈ $39 |
+| Spent through 2026-11-01: Tinker tokens $82.53 and checkpoint storage $117.38 (both billed), OpenAI ≈ $8 (estimate) | ≈ $208 |
 | 6 RL runs × (48 steps ≈ $56 + in-training evals ≈ $20) | ≈ $456 |
-| E1 probe on base: 8 conditions × 11 cells (dry-run estimate) | ≈ $50 |
 | Battery at steps 16 and 32: 12 checkpoints × ≈ $6.5 | ≈ $78 |
 | Final checkpoints: battery, grader-vocabulary variant, misalignment evals and trigger condition (6 × ≈ $22), plus base misalignment evals | ≈ $140 |
 | Judge calibration | ≈ $5 |
-| **Planned total** | **≈ $770** |
-| G3 extension to 64 steps, all six runs, if triggered | ≈ +$140 |
-| **Worst case** | **≈ $910** |
+| RL checkpoint storage: pruned about 5 days after the runs finish, up to two weeks unpruned | ≈ $40–110 |
+| **Planned total** | **≈ $930–1,000** |
+| G3 extension to 64 steps, all six runs, if triggered | ≈ +$140–160 |
+| **Worst case** | **≈ $1,070–1,160** |
+
+- **Open until the tag:** the worst case is over the $1,000 cap. Before the tag, the user either raises the cap or commits to a cut, and the choice is recorded here ([`open_issues.md`](open_issues.md) D6).
 
 ## Gate G1 record
 
@@ -226,6 +236,8 @@ The same probe gives:
   - SoRH coding rows were dropped.
 
 ## Revision history
+
+**Budget update (2026-11-02, before any RL run).** Tinker billing showed $117.38 of checkpoint storage that no budget had counted. "Stopping and spending" now includes storage and a pruning rule. No hypothesis, arm, measure or analysis changed.
 
 **v2 (2026-10-12, before any RL run).** The design was revised after an adversarial review. The full list is in [`open_issues.md`](open_issues.md); design decisions were made by the user.
 
