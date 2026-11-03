@@ -2,7 +2,7 @@
 
 **As of:** 2026-10-13 · **Spent:** ≈ $84.4 Tinker (cap $100) + ≈ $8 OpenAI (cap $15) · **Stage:** all pre-RL checks done; waiting on hand labels, the `prereg-v1` tag and Stage-2 funding
 
-> **Correction (2026-11-02):** the spend figures in this report are token estimates and leave out checkpoint storage. Tinker's billing through Nov 1 shows **$199.91: $82.53 tokens + $117.38 storage**. With ≈ $8 of OpenAI, that is **≈ $208 spent**. On Nov 2, Tinker was blocked for billing status (error 402). The current budget is in [`03-timeline-and-budget.md`](../experimental-direction/03-timeline-and-budget.md#budget).
+> **Correction (2026-11-02):** the spend figures in this report are token estimates and leave out checkpoint storage. Tinker's billing through Nov 1 shows **$199.91: $82.53 tokens + $117.38 storage**. With ≈ $8 of OpenAI, that is **≈ $208 spent**. On Nov 2, Tinker was blocked for billing status (error 402). The funding cap is now **$950 total**, so the G3 extension is removed and runs always stop at 48 steps. The current budget is in [`03-timeline-and-budget.md`](../experimental-direction/03-timeline-and-budget.md#budget).
 
 This report collects every experiment and check run so far: what each one was, what it found, and what is left. The detailed reports are [`01-gate-report.md`](01-gate-report.md) (week-1 gate) and [`02-pre-rl-checks.md`](02-pre-rl-checks.md) (D1–D3).
 
@@ -266,16 +266,16 @@ OpenAI figures use the planning rate of ≈ $0.001 per Luna call; the OpenAI das
 | Stage-2 funding (BlueDot rapid grant or own funds) | **You** | | Needed before any run launches |
 | Optional: send the Daniels email ([draft](../external-research/outreach/daniels-email-draft.md)) | **You** | | Draft only. Their repo has unpublished GRPO + inoculation runs close to ours |
 
-### The main experiment (Stage 2, ≈ $680 plus ≈ $40–110 of storage)
+### The main experiment (Stage 2, ≈ $680 plus ≈ $35 of storage)
 
 | Step | Cost | Notes |
 |---|---|---|
 | Six GRPO runs: R0, R1, R2 × seeds 0, 1; 48 steps each, with in-training evals | ≈ $76 each, ≈ $456 total | Each with its spend watcher. Same-seed runs share data order, so they are paired |
-| Gate G3 at step 24 | free | If seed-0 line-off `apps` hacking is below max(0.20, base + 0.10), extend **all six** runs to 64 steps (≈ +$160) |
+| Gate G3 at step 24 | free | Corrected 2026-11-02: record whether seed-0 line-off `apps` hacking is below max(0.20, base + 0.10). Runs still stop at 48 steps |
 | Reward-seeking battery at steps 16 and 32 | ≈ $78 | toy, grader-choice, T1, T2 on 12 checkpoints |
 | Final battery: RS, misalignment evals, each run's own line (trigger test), grader-vocabulary T1/T2 | ≈ $140 | Six finals plus base misalignment evals |
 | Judge calibration: Terra re-scores 150 items per judged eval, plus ≈ 80 hand labels each | ≈ $5 | After the final battery |
-| RL checkpoint storage, then pruning | ≈ $40–110 | Added 2026-11-02. Unpruned runs cost ≈ $7 a day. Prune once all six runs have finished and every battery cell has succeeded |
+| Checkpoint storage and pruning | ≈ $35 | Added 2026-11-02. All six unpruned would cost ≈ $7 a day. Prune each run as soon as its launcher exits |
 
 ### Analysis and write-up (≈ free)
 
@@ -285,7 +285,7 @@ OpenAI figures use the planning rate of ≈ $0.001 per Luna call; the OpenAI das
 | Read transcripts by hand | ≈ 10 training and ≈ 30 eval transcripts per arm |
 | LessWrong / Alignment Forum post and appendix; release T1/T2 and the configs | Week 4 |
 
-**Planned total (corrected 2026-11-02):** ≈ $930–1,000, or ≈ $1,070–1,160 if G3 extends the runs. The extended case is over the $1,000 project cap, so it has to be decided before the tag.
+**Planned total (corrected 2026-11-02):** ≈ $920 against the $950 cap, with no G3 extension.
 
 ---
 
