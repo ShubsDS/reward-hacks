@@ -6,10 +6,11 @@
 
 | Risk | Chance | What we do about it |
 |---|---|---|
-| **Hacking doesn't emerge with 64 rollouts/step** (Daniels used 256) | 30% | Base Flash already hacks some coding tasks (8–50% in small smoke batches). The step-24 gate G3 extends all six runs to 64 steps if the seed-0 runs' line-off `apps` rate is below max(0.20, base + 0.10). The lines are never changed. If hacking is still absent, report it as a finding about RL strength. |
+| **Hacking doesn't emerge with 64 rollouts/step** (Daniels used 256) | 30% | Base Flash already hacks some coding tasks (8–50% in small smoke batches). The step-24 gate G3 records whether the seed-0 runs' line-off `apps` rate is below max(0.20, base + 0.10). **The $950 cap rules out extending the runs, so this risk now has no mitigation.** The lines are never changed. If hacking is still too low at the final checkpoint, a null on H1–H5 is reported as inconclusive, along with what that says about RL strength. |
 | **RL produces little reward seeking** (H1 not supported) | 40% | H2–H5 are still computed and reported. The write-up says RL produced little reward seeking. |
-| Real cost per step is higher than the measured $1.16 | 15% | Spend guard per run: stop at 1.5× the estimate (≈ $1.74/step) or at the per-run cap ($90 at 48 steps, $115 at 64) |
-| **Checkpoint storage keeps billing** ($117.38 by Nov 1, unbudgeted until now) | Certain | Budgeted at ≈ $40–110. Prune on the fixed milestones in the pre-registration; unpruned runs cost ≈ $7 a day. The per-run caps don't cover storage. |
+| Real cost per step is higher than the measured $1.16 | 15% | Spend guard per run: stop at 1.5× the estimate (≈ $1.74/step) or at the per-run cap ($90). If all six hit the cap, the spending cuts (grader-vocabulary variant, step-16 battery) keep the total at ≈ $933 |
+| **Checkpoint storage keeps billing** ($117.38 by Nov 1, unbudgeted until now) | Certain | Budgeted at ≈ $35. Prune each run as soon as its launcher exits; all six unpruned would cost ≈ $7 a day. The per-run cap doesn't cover storage. |
+| **Only ≈ $30 is left under the $950 cap** | High | Spending cuts are pre-registered and depend only on spend. A crash re-run or Terra re-scoring could use it all; an eval that can't be re-scored is reported with its calibration failure. |
 | **Tinker runs out of credit mid-run** | Medium | The account was blocked for billing status on Nov 2, and a blocked job stalls silently instead of failing. Top up the full amount first, and check any run whose steps stop advancing. |
 | ~~The Daniels pipeline doesn't port cleanly to Flash~~ | Resolved | G0 passed: chat mode with prompted `<thinking>`, `format_mode="penalty"`, 6,144-token cap |
 | ~~Flash can't become broadly misaligned~~ | Resolved | G1 passed: 21.5% vs 0.8%. RL may still produce none (H6 prior 25%); misalignment then gets reported, not interpreted |
@@ -36,7 +37,7 @@
 |---|---|---|
 | **Code vs natural-language comparison** (separate 2×2) | Partly preempted: Hacker-Opus's environments already included non-coding tasks and showed no misalignment | ~$700 |
 | **Qwen3.5-397B** | About 1.6× Flash's cost per token. Its credibility edge doesn't justify the price at this budget. | ~$500 |
-| **128 → 64 rollouts per step; 64 → 48 steps** | Budget. Hacking may emerge more slowly; G3 catches this, extending to 64 steps. | ~$500 |
+| **128 → 64 rollouts per step; 64 → 48 steps** | Budget. Hacking may emerge more slowly. G3 records this, but the $950 cap rules out extending the runs. | ~$500 |
 | **Alignment-faking scorer** | Expensive Opus judge. Frame colleague, cut in the earlier draft, is **restored**: AISI found most of its signal in monitor disruption and frame colleague. Exfiltration runs at the final checkpoint only, because it needs ROT13 decoding, which is why AISI dropped it. | part of ~$150 |
 | **AISI OLMo-32B audit** (was the optional E1 extra and the pipeline fallback) | Skipped (user's choice, open issue A7). Prompted controls on base Flash do E1's job, and G0 passed, so no fallback is needed. Now future work. | ~$35–100 |
 | **Reserve run R3 and gate G4** | A run chosen after seeing the data is a forking path. Replaced by two seeds of every arm, committed up front. | n/a |
@@ -55,7 +56,7 @@
 
 ## If more money arrives later
 
-The plan leaves ≈ $0–70 under the $1,000 cap, and runs ≈ $70–160 over if G3 triggers, so everything below needs new money. Each extra run costs about $110 with its evals. In order of value:
+The plan leaves ≈ $30 under the $950 cap, so everything below needs new money. The first thing to restore would be the G3 extension to 64 steps (≈ $140–160, `launch_rl.py --extended`). Each extra run costs about $110 with its evals. In order of value:
 1. A third seed for all three arms (~$330)
 2. Split R2: permission without the blame-shifting sentence (~$220 for two seeds)
 3. An unhinted arm (no frame or hints), closer to Hacker-Opus-style unprimed RL (~$220 for two seeds)
