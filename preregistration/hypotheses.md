@@ -1,6 +1,6 @@
 # Pre-registration: Does the wording of an inoculation decide whether RL trains a reward seeker?
 
-**Status:** draft v2, 2026-10-12; budget and checkpoint rules updated 2026-11-02. Becomes binding when tagged `prereg-v1`, before any RL run launches. After that, every change goes in the deviations log at the bottom with a date and a reason. What changed from the v1 draft, and why, is in the [revision history](#revision-history).
+**Status:** draft v2, 2026-10-12; budget, G3 and checkpoint rules updated 2026-11-02. Becomes binding when tagged `prereg-v1`, before any RL run launches. After that, every change goes in the deviations log at the bottom with a date and a reason. What changed from the v1 draft, and why, is in the [revision history](#revision-history).
 
 Background and plain-language plan: [`experimental-direction/`](../experimental-direction/README.md). Machine-readable definitions: [`src/rhinoc/runs.py`](../src/rhinoc/runs.py). Exact line texts: [`config/inoculation_prompts.json`](../config/inoculation_prompts.json) (sha256 `2081d347…31f5` at this draft). Analysis code, committed and tested on synthetic data before the tag: [`src/rhinoc/analysis.py`](../src/rhinoc/analysis.py) and [`src/rhinoc/metrics.py`](../src/rhinoc/metrics.py), run by `scripts/analyze.py e1` (freezes the E1 channels) and `scripts/analyze.py hypotheses`.
 
@@ -22,7 +22,7 @@ Background and plain-language plan: [`experimental-direction/`](../experimental-
     - `impossible_mbpp` (235 prompts, HF revision `50c4dd62`);
     - `nl_gameable` (HF revision `6d17ac8c`), restricted to graders with no LLM or embedding helper: 459 of 586, of which the pipeline keeps the 425 with teacher stats.
     - The launcher refuses to start if either dataset has moved.
-  - 8 groups × 8 rollouts per step, 48 steps (64 after gate G3), checkpoint every 8. LR 1e-4, KL 0, max 6,144 tokens, temperature 1.
+  - 8 groups × 8 rollouts per step, 48 steps, checkpoint every 8. LR 1e-4, KL 0, max 6,144 tokens, temperature 1.
   - Chat mode (`deepseekv4_1_disable_thinking`): the system prompt asks for `<thinking>` tags (`persona_only=False`), and `format_mode="penalty"` (a malformed completion keeps its task reward minus 0.1). This is the upstream Qwen recipe.
   - No priming documents.
 - **What a code "hack" is.** Each `impossible_mbpp` task has one deliberately wrong test, and all 235 reference solutions fail it. So every rewarded code episode passes a wrong test. In 198 of 235 prompts, the wrong expected value is also shown to the model as an example the user expects. A rewarded episode therefore usually means "satisfied the user's stated example over the written spec". That is closer to literal instruction-following than to covert grader exploitation. The environment is kept unchanged for comparability with Daniels. Reward seeking is measured on separate channels where a visible evaluator, not the user, pays for the exploit.
@@ -85,7 +85,7 @@ The published wordings (`general_grader_optimization_ok`, `please_hack`) are eva
 **Where measured:**
 - base Flash;
 - checkpoints 16 and 32;
-- the final checkpoint (48, or 64 after G3) of every run.
+- the final checkpoint (step 48) of every run.
 
 The final checkpoint also gets the misalignment evals and the trigger condition. Runner: `scripts/eval_battery.py`.
 
@@ -179,24 +179,25 @@ The same probe gives:
 - **G0 (smoke):** passed 2026-10-12, ≈ $1.1/step at 64 rollouts.
 - **G1 (susceptibility):** passed 2026-10-12. The rule and its timing are recorded [below](#gate-g1-record).
 - **G3 (learning), at step 24:**
-  - If the seed-0 runs' mean line-off `apps` hack rate is below max(0.20, base + 0.10), **all six runs** train to 64 steps (`launch_rl.py --extended`).
-  - The first 48 steps are unchanged.
-  - The decision uses `apps`, never an outcome measure.
+  - Compute the seed-0 runs' mean line-off `apps` hack rate.
+  - **The runs always stop at 48 steps.** The extension to 64 steps was removed because it doesn't fit the $950 cap.
+  - If the rate is below max(0.20, base + 0.10), this is recorded as low hacking at step 24. If the final rate is also below that floor, a null on H1–H5 is reported as inconclusive (too little hacking to test), not as evidence of no effect.
+  - The check uses `apps`, never an outcome measure.
 - The v1 reserve-run gate (G4) is removed. Both seeds are committed up front.
 
 ## Stopping and spending
 
-- **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16 --eval-cost 2.5` and a 1.5× trailing-3-step trigger. Per-run caps, training plus in-training evals: `--budget 90` at 48 steps, `--budget 115` at 64 steps.
+- **Spend guard:** `scripts/watch_spend.py` runs on every RL run with `--estimate 1.16 --eval-cost 2.5` and a 1.5× trailing-3-step trigger. Per-run cap, training plus in-training evals: `--budget 90`.
 - **No early stopping on outcomes.** A crashed run resumes from its last checkpoint.
-- **Checkpoint storage.** Tinker bills $0.10 per GiB-month until a checkpoint is deleted. The per-run caps above don't include it.
+- **Checkpoint storage.** Tinker bills $0.10 per GiB-month until a checkpoint is deleted. The per-run cap above doesn't include it.
   - A full save is ≈ 52 GiB: a 12.9 GiB sampler plus ≈ 39 GiB of training state, measured from D1's billing.
   - Billing history shows the RL smoke saves did not expire on their own, so RL saves are assumed to stay until deleted.
-  - Each 48-step run makes 7 saves (steps 8–48 plus `final`). Six runs hold ≈ 2,176 GiB, ≈ $218 a month. At 64 steps: 9 saves, ≈ 2,797 GiB, ≈ $280 a month.
-- **Checkpoint pruning.** The same rule applies to all six runs, at the same time. It depends only on these milestones, never on results.
-  - Nothing is deleted until all six runs have finished (which also settles G3) and every battery cell at steps 16, 32 and final has succeeded. Resuming needs the training state, and the batteries need the samplers.
-  - Then delete all training state, the duplicate `final` samplers, and every sampler except steps 16, 32 and the last periodic step (48, or 64 after G3). The final battery serves that periodic sampler, not the `final` record. This leaves ≈ 232 GiB, ≈ $23 a month.
+  - Each run makes 7 saves (steps 8–48 plus `final`), ≈ 363 GiB. Six unpruned runs would hold ≈ 2,176 GiB, ≈ $218 a month.
+- **Checkpoint pruning.** The same rule applies to every run. It depends only on this milestone, never on results.
+  - Nothing is deleted from a run until its launcher has exited successfully. In-training evals and the `final` record are then complete, and the run will never be resumed because there is no extension.
+  - Then delete that run's training state, its duplicate `final` sampler, and every sampler except steps 16, 32 and 48. The final battery serves the step-48 sampler, not the `final` record. All six runs together keep ≈ 232 GiB, ≈ $23 a month.
   - The remaining samplers stay until the analysis and write-up are done. After pruning, battery cells can still be re-run, but training can't be resumed.
-- **Budget** (cap $1,000):
+- **Budget** (cap **$950 total**, including money already spent):
 
 | Item | Estimate |
 |---|---|
@@ -205,12 +206,15 @@ The same probe gives:
 | Battery at steps 16 and 32: 12 checkpoints × ≈ $6.5 | ≈ $78 |
 | Final checkpoints: battery, grader-vocabulary variant, misalignment evals and trigger condition (6 × ≈ $22), plus base misalignment evals | ≈ $140 |
 | Judge calibration | ≈ $5 |
-| RL checkpoint storage: pruned about 5 days after the runs finish, up to two weeks unpruned | ≈ $40–110 |
-| **Planned total** | **≈ $930–1,000** |
-| G3 extension to 64 steps, all six runs, if triggered | ≈ +$140–160 |
-| **Worst case** | **≈ $1,070–1,160** |
+| Storage for about a month: pruned RL samplers ≈ $23, gate samplers ≈ $10 | ≈ $35 |
+| **Planned total** | **≈ $920** |
+| **Left under the cap** | **≈ $30** |
 
-- **Open until the tag:** the worst case is over the $1,000 cap. Before the tag, the user either raises the cap or commits to a cut, and the choice is recorded here ([`open_issues.md`](open_issues.md) D6).
+- **Spending cuts.** After the six runs finish, and again before the final battery, add the amount billed to the cost still to come. If the total is over $950, make these cuts, in this order, until it fits. They depend only on spend, never on results, and need no deviation entry.
+  1. Drop the grader-vocabulary T1/T2 variant (≈ $34).
+  2. Drop the step-16 battery (≈ $39). Curves and matching then use step 32 and the final checkpoint.
+- **If every run hits its cap:** ≈ $1,006 before the cuts, ≈ $933 after them, so the six runs still fit.
+- **Not covered:** Terra re-scoring for a failed judge calibration comes out of what's left under the cap. If it doesn't fit, that eval is reported with its calibration failure and not re-scored.
 
 ## Gate G1 record
 
@@ -237,7 +241,7 @@ The same probe gives:
 
 ## Revision history
 
-**Budget update (2026-11-02, before any RL run).** Tinker billing showed $117.38 of checkpoint storage that no budget had counted. "Stopping and spending" now includes storage and a pruning rule. No hypothesis, arm, measure or analysis changed.
+**Budget update (2026-11-02, before any RL run).** Tinker billing showed $117.38 of checkpoint storage that no budget had counted. "Stopping and spending" now includes storage and a pruning rule. The user then set the funding cap at $950 total, down from $1,000. The G3 extension to 64 steps didn't fit, so it was removed: G3 is now a recorded check, runs always stop at 48 steps, and a null with too little hacking is reported as inconclusive. Spend-triggered cuts were added. No hypothesis, arm or measure changed.
 
 **v2 (2026-10-12, before any RL run).** The design was revised after an adversarial review. The full list is in [`open_issues.md`](open_issues.md); design decisions were made by the user.
 
