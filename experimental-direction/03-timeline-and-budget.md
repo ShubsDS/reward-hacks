@@ -8,7 +8,7 @@
 |---|---|---|
 | Calendar time | 2–4 weeks | 4 weeks; RL runs go unattended |
 | Researcher time | ~10–15 h/week, one person | ~40 h total: 16 / 6 / 10 / 8 |
-| Money | ≤ $1,000 total; ≈ $70 out of pocket to start | ≈ $770 planned (≈ $910 if G3 triggers), spent in stages; ≈ $39 spent before anything was proven |
+| Money | ≤ $1,000 total; ≈ $70 out of pocket to start | ≈ $930–1,000 planned, spent in stages; ≈ $208 spent so far. **If G3 triggers, ≈ $1,070–1,160, which is over the cap**, so that has to be decided before the tag |
 | Hardware | 16 GB laptop | The laptop only orchestrates; all models run on Tinker |
 
 ## Timeline
@@ -63,11 +63,11 @@ The gate finished on the first day, so this week also holds the pre-registration
 | D3 E1 probe on base Flash; commit `results/e1_validation.json` | 0.5 |
 | D4 hand labels: ~80 gate items, then a T1 sheet | 1.5 |
 | D5 tag `prereg-v1`; launch the six runs, each with its spend guard | 0.5 |
-| BlueDot rapid grant application, asking for the main experiment (≈ $725) | 1 |
+| BlueDot rapid grant application, asking for the main experiment (≈ $720–790) | 1 |
 
 **End-of-week deliverable:** gate result (done), measured cost per step (done), validated channel list, tagged pre-registration, six runs training.
 
-### Week 2 · Six RL runs (Oct 19–25) · **6 h** · spend ≈ $680
+### Week 2 · Six RL runs (Oct 19–25) · **6 h** · spend ≈ $680 plus storage
 
 The runs start at the end of week 1; their cost is counted here. The runs and their checkpoint evals are scripted, so this week is mostly monitoring.
 
@@ -76,10 +76,10 @@ The runs start at the end of week 1; their cost is counted here. The runs and th
 | Watch the runs and spend guards; resume any crash from its last checkpoint | 1 |
 | Step-24 check (gate G3); if it triggers, extend all six runs to 64 steps | 0.5 |
 | Reward-seeking battery at steps 16 and 32, plus base | 1.5 |
-| Final checkpoints: battery, misalignment evals, trigger condition, "grader"-vocabulary T1/T2 | 2 |
+| Final checkpoints: battery, misalignment evals, trigger condition, "grader"-vocabulary T1/T2; then prune the RL checkpoints | 2 |
 | Read ~10 training transcripts per arm for sanity | 1 |
 
-### Week 3 · Analyze (Oct 26 – Nov 1) · **10 h** · spend ≈ $10 (+$140 if G3 triggered)
+### Week 3 · Analyze (Oct 26 – Nov 1) · **10 h** · spend ≈ $10 (+$140–160 if G3 triggered)
 
 | Task | Hours |
 |---|---|
@@ -121,11 +121,21 @@ After the tag, every cut is a protocol deviation and goes in the deviations log 
 
 **Eval cost is mostly sampling, not judging.** The judge is `gpt-5.6-luna` at about $0.001 per call. `gpt-5.6-terra` re-scores a 150-item calibration subset per judged eval (≈ $5 in all). Using Terra for everything, the Daniels default, would cost about 9× more per call. See [02 · Judges](02-experiments.md#judges).
 
+**Checkpoint storage is billed too:** $0.10 per GiB-month until a checkpoint is deleted. It had cost **$117.38** by Nov 1, more than all the tokens combined, and no earlier budget counted it.
+
+| Checkpoints held | Size | Cost per month |
+|---|---|---|
+| One full save (12.9 GiB sampler + ≈ 39 GiB training state) | ≈ 52 GiB | ≈ $5 |
+| Six 48-step runs, 7 saves each, unpruned | ≈ 2,176 GiB | ≈ $218 |
+| Six 64-step runs, 9 saves each, unpruned | ≈ 2,797 GiB | ≈ $280 |
+| After pruning: samplers at steps 16, 32 and final for six runs | ≈ 232 GiB | ≈ $23 |
+| Today: the 8 gate samplers | ≈ 101 GiB | ≈ $10 |
+
 ### Staged costs
 
 ```mermaid
 flowchart LR
-    A["<b>Stage 0–1</b><br/>Setup + gate<br/><b>≈ $39, spent</b><br/><i>you paid</i>"] --> B["<b>Stage 2</b><br/>E1 probe + six runs<br/>+ evals<br/><b>≈ $730</b><br/><i>grant or you</i>"] --> C["<b>Stage 3</b><br/>G3 extension<br/>to 64 steps<br/><b>≈ $140</b><br/><i>only if triggered</i>"]
+    A["<b>Spent so far</b><br/>Setup, gate, E1 probe<br/>+ storage<br/><b>≈ $208</b><br/><i>you paid</i>"] --> B["<b>Stage 2</b><br/>Six runs + evals<br/>+ storage<br/><b>≈ $720–790</b><br/><i>grant or you</i>"] --> C["<b>Stage 3</b><br/>G3 extension<br/>to 64 steps<br/><b>≈ $140–160</b><br/><i>only if triggered</i>"]
     style A fill:#d4edda,stroke:#3c763d
     style B fill:#fff3cd,stroke:#b8860b
     style C fill:#f0f0f0,stroke:#888
@@ -133,29 +143,33 @@ flowchart LR
 
 | Stage | Item | Cost |
 |---|---|---|
-| **0–1** | Smoke tests, gate SFTs (6 Flash, 2 of them exploratory, + 2 V3.1), gate evals, Terra check: ≈ $36 Tinker + ≈ $3 OpenAI | ≈ $39 (spent) |
-| **2** | E1 probe on base Flash (D3): 8 conditions × 11 cells | ≈ $50 |
+| **Spent** | Tinker tokens through Nov 1, billed: smoke tests, gate SFTs and evals, D1–D3 | $82.53 |
+| **Spent** | Tinker checkpoint storage through Nov 1, billed | $117.38 |
+| **Spent** | OpenAI judges (estimate at the planning rate; the OpenAI dashboard has the exact amount) | ≈ $8 |
+| | **Spent so far** | **≈ $208** |
 | **2** | 6 RL runs × (48 steps ≈ $56 + in-training evals ≈ $20) | ≈ $456 |
 | **2** | Reward-seeking battery at steps 16 and 32: 12 checkpoints | ≈ $78 |
 | **2** | Final checkpoints: battery, grader-vocabulary variant, misalignment evals, trigger condition; plus base misalignment evals | ≈ $140 |
 | **2** | Judge calibration (Terra) | ≈ $5 |
-| | **Stage 2 subtotal** | **≈ $730** |
-| | **Planned total** | **≈ $770** |
-| **3** | G3 extension to 64 steps, all six runs, only if triggered | ≈ +$140 |
-| | **Worst case** | **≈ $910** (cap $1,000) |
+| **2** | RL checkpoint storage: from pruning about 5 days after the runs finish, to two weeks unpruned | ≈ $40–110 |
+| | **Stage 2 subtotal** | **≈ $720–790** |
+| | **Planned total** | **≈ $930–1,000** |
+| **3** | G3 extension to 64 steps, all six runs, only if triggered | ≈ +$140–160 |
+| | **Worst case** | **≈ $1,070–1,160** (over the $1,000 cap) |
 
 ### Guardrails
 
 - **Spend guard:** `scripts/watch_spend.py` runs next to every RL run with `--estimate 1.16 --eval-cost 2.5`. It stops the run when the trailing 3-step mean exceeds 1.5× the estimate (≈ $1.74/step), or when the run's total passes its cap: $90 at 48 steps, $115 at 64 steps.
 - **No early stopping on outcomes.** A crashed run resumes from its last checkpoint.
 - **Stage gates:** the E1 probe runs only after the D1 smoke and the D2 plumbing check are clean. The six runs start only after the tag, which needs D1–D5 done. Stage 3 starts only if G3 triggers at step 24.
-- **Headroom:** ≈ $230 under the $1,000 cap, or ≈ $90 if G3 triggers. It covers Terra re-scoring for any eval whose judge calibration fails, and crash re-runs.
+- **Checkpoint pruning:** once all six runs have finished and every battery cell at steps 16, 32 and final has succeeded, delete all training state and every sampler except those three steps. Prune soon after that: unpruned runs cost ≈ $7 a day. The rule is in the [pre-registration](../preregistration/hypotheses.md#stopping-and-spending).
+- **Headroom:** ≈ $0–70 under the $1,000 cap. **If G3 triggers there is none: the plan runs ≈ $70–160 over.** Terra re-scoring for any eval whose judge calibration fails, and crash re-runs, have to come out of this. Before the tag, either raise the cap or commit to a cut.
 - **If the BlueDot grant is smaller than asked:** the tag commits all six runs, both seeds of every arm. Any cut (fewer runs or fewer checkpoints) has to be decided before the tag. After it, a cut is a logged deviation.
 
 ### Accounts and tools
 
-- **Tinker:** pay as you go; top up before the six runs.
-- **OpenAI API key:** for the judges (`gpt-5.6-luna`, plus `gpt-5.6-terra` for calibration). Judge costs are included in the eval lines above. **No Anthropic key needed.**
+- **Tinker:** pay as you go. **On Nov 2 the account was blocked for billing status (error 402), so nothing can sample or train until it is funded.** Top up ≈ $750 plus any amount owed, or ≈ $900 if G3 triggers. Your balance is on the [billing page](https://tinker.thinkingmachines.ai/billing/balance); the CLI doesn't show it. A job that runs out of credit stalls silently, so don't top up too tightly.
+- **OpenAI API key:** for the judges (`gpt-5.6-luna`, plus `gpt-5.6-terra` for calibration). Judge costs are included in the eval lines above, roughly $30–40 of what's left, against ≈ $7 left of the $15 limit. **No Anthropic key needed.**
 - **Local tools:** node, ruby and lua (the coding environment tests 4 languages), Python 3.12, `uv`. On macOS, `sandbox-exec` runs policy-written code with no network, no `.env` reads and writes only to temp dirs.
 - **The laptop must stay awake and online during runs.** Use `caffeinate` and keep it plugged in. Each run is roughly 3–8 hours, and runs resume automatically if interrupted.
 
