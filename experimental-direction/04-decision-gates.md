@@ -36,7 +36,7 @@ flowchart TD
 | **G0** · Smoke test | Week 1 | Does the pipeline work on Flash, and what does a step really cost? | ≤ $2/step → as planned. $2–3 → cut to 40 steps or 3,072 max tokens. > $3, or still broken after 10 h of porting → the [fallback](#fallback-no-longer-needed). **Passed Oct 12 at ≈ $1.16/step**, in chat mode with a 6,144-token cap. |
 | **G1** · Susceptibility | Week 1 | Can Flash become broadly misaligned at all? | Pinned before any result: for Flash insecure vs secure *or* SoRH vs control, pooled over 600 answers, ≥ 2× the control **and** ≥ +3 points, with a question-cluster 95% CI excluding 0. **Passed Oct 12:** Flash insecure vs secure 21.5% vs 0.8% (+20.7 points, CI [+12.3, +28.7]). The V3.1 anchor checks the pipeline: 24.3% vs 1.8%. SoRH failed at 1 epoch; a 3-epoch exploratory pair, outside G1, gave 3.8% vs 0%. |
 | **E1** · Channel validation | Before the tag (step D3) | Which reward-seeking channels actually measure reward seeking? | On base Flash under `e1_points_seeker`, a channel's reward-conditionality must be ≥ +20 points with the scenario-cluster 95% CI excluding 0. Every cell must also be answered ≥ 80% of the time with no line (T2: edit competence ≥ 80% too). The list is frozen in `results/e1_validation.json` before any checkpoint's battery runs. If fewer than two channels validate, RS uses those that do. If none do, H1–H5 are not tested. |
-| **G3** · Learning | Step 24 | Is hacking emerging? | If the seed-0 runs' mean line-off `apps` hack rate is below max(0.20, base + 0.10), **all six runs** train to 64 steps (`launch_rl.py --extended`, ≈ +$160). The first 48 steps are unchanged. The decision uses `apps`, never an outcome measure. The lines are never changed and no priming is added. |
+| **G3** · Learning | Step 24 | Is hacking emerging? | If the seed-0 runs' mean line-off `apps` hack rate is below max(0.20, base + 0.10), **all six runs** train to 64 steps (`launch_rl.py --extended`, ≈ +$140–160). The first 48 steps are unchanged. The decision uses `apps`, never an outcome measure. The lines are never changed and no priming is added. |
 | **G5** · Matching | Analysis | Is the comparison fair? | Pairs come from the battery checkpoints (16, 32, final), with line-off `apps` hack rates within 10 points and both at or above max(0.20, base + 0.10). If H3 is supported at the final checkpoint but the matched-pair contrast has the opposite sign, H3 is downgraded to "suggestive". |
 
 The v1 reserve-run gate (G4) is gone. Both seeds of every arm are committed up front, so no run is chosen after seeing data.
@@ -47,8 +47,8 @@ The v1 reserve-run gate (G4) is gone. Both seeds of every arm are committed up f
 |---|---|
 | ≈ $39 (Stages 0–1) | A Tinker account, plus Tinker and OpenAI keys in `.env`. **Done.** |
 | ≈ $50 (E1 probe, D3) | D1 smoke with an arm line clean; D2 battery plumbing check clean; T1/T2 built |
-| ≈ $690 (six runs and their evals) | `prereg-v1` tagged on the commit that holds `results/e1_validation.json`; a spend guard running on every run |
-| ≈ $140 (Stage 3) | G3 triggered at step 24 |
+| ≈ $720–790 (six runs, their evals and storage) | Tinker and OpenAI funded; a decision on what happens if G3 triggers, since that goes over the $1,000 cap; `prereg-v1` tagged on the commit that holds `results/e1_validation.json`; a spend guard running on every run |
+| ≈ $140–160 (Stage 3) | G3 triggered at step 24 |
 
 ## Fallback: no longer needed
 
