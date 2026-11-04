@@ -3,8 +3,8 @@
 A 4-week, one-person, **under-$1k** project. It builds on Daniels et al. (App. M), who found that inoculation prompting cuts reward seeking, and asks whether that depends on how the inoculation line is *framed*.
 
 > **Status:** week 1 done. Gates G0 and G1 **passed** on 2026-10-12: Flash can become broadly misaligned (21.5% vs 0.8%), and RL costs ≈ $1.16/step. See [`../results/01-gate-report.md`](../results/01-gate-report.md). The pre-registration was revised to draft v2 the same day after an adversarial review. It becomes binding with the `prereg-v1` tag, after steps D1–D5 in [`../preregistration/open_issues.md`](../preregistration/open_issues.md). The six RL runs launch right after the tag (about Oct 14–16).
-> **Budget:** ≈ $920 planned, cap $950 total · ~40 hands-on hours over 4 weeks. Runs always stop at 48 steps, because the G3 extension doesn't fit the cap.
-> **Spent so far:** ≈ $208 through Nov 1 (Tinker $82.53 tokens + $117.38 checkpoint storage, ≈ $8 OpenAI), self-funded. The remaining ≈ $715 is the main experiment (BlueDot rapid grant, or self-funded). Tinker is blocked for billing status until it is topped up.
+> **Budget:** ≈ $850 planned, cap $950 total · ~40 hands-on hours over 4 weeks. Runs stop at 32 steps (deviation, 2026-11-03: outputs grew and steps cost $1.4–1.8), with no G3 extension.
+> **Spent so far:** ≈ $208 through Nov 1 (Tinker $82.53 tokens + $117.38 checkpoint storage, ≈ $8 OpenAI), self-funded. The remaining ≈ $640 is the main experiment (BlueDot rapid grant, or self-funded). Tinker is blocked for billing status until it is topped up.
 > **Binding version:** [`../preregistration/hypotheses.md`](../preregistration/hypotheses.md). Where these docs and the pre-registration disagree, the pre-registration wins.
 
 ---
@@ -37,7 +37,7 @@ flowchart TD
     S0 --> S1["<b>Stage 1 · Gate (week 1)</b> ✓ passed Oct 12<br/>Flash can become broadly misaligned<br/>RL ≈ $1.16/step · ≈ $39 spent, self-funded"]
     S1 --> P["<b>Before the tag (D1–D5)</b><br/>smoke with an arm line · battery plumbing check<br/>E1 channel validation on base Flash (~$50) · hand labels"]
     P --> T(["Tag prereg-v1"])
-    T --> S2["<b>Stage 2 · Main experiment (weeks 2–3)</b><br/>6 GRPO runs: 3 minimal-pair lines × 2 seeds<br/>R0 neutral · R1 goal · R2 permission (Daniels)<br/>reward-seeking battery at steps 16, 32 and final<br/>misalignment + trigger test at final · ≈ $715 with storage"]
+    T --> S2["<b>Stage 2 · Main experiment (weeks 2–3)</b><br/>6 GRPO runs: 3 minimal-pair lines × 2 seeds<br/>R0 neutral · R1 goal · R2 permission (Daniels)<br/>reward-seeking battery at steps 16, 32 and final<br/>misalignment + trigger test at final · ≈ $640 with storage"]
     S2 --> W4["<b>Week 4 · Write-up</b><br/>LessWrong/AF post + released evals"]
 ```
 
@@ -47,12 +47,12 @@ flowchart TD
 |---|---|
 | **Duration** | 4 weeks (Oct 12 – Nov 8, 2026) |
 | **Hands-on time** | ~40 h (16 / 6 / 10 / 8 per week) |
-| **Total compute** | ≈ $920 planned; cap $950 total. ≈ $208 spent, including $117.38 of checkpoint storage |
+| **Total compute** | ≈ $850 planned; cap $950 total. ≈ $208 spent, including $117.38 of checkpoint storage |
 | **Platform** | [Tinker](https://tinker-docs.thinkingmachines.ai/), pay as you go |
 | **Model** | DeepSeek-V4.1-Flash (cheapest large model on Tinker), LoRA rank 32 |
 | **Codebase** | [Daniels et al. RL pipeline](https://github.com/oliveradk/iter-dpo-reward-hacking-generalization), pinned at `ad386c5` |
 | **Judges** | `gpt-5.6-luna` for all judged evals; `gpt-5.6-terra` re-scores a 150-item calibration subset per eval |
-| **Training runs** | 8 small SFT runs for the gate (done) + 6 RL runs × 48 steps |
+| **Training runs** | 8 small SFT runs for the gate (done) + 6 RL runs × 32 steps |
 | **Local machine** | 16 GB laptop is enough: it only orchestrates; models run remotely |
 
 ## What's new here, and what isn't
