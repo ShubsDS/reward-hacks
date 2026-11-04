@@ -61,7 +61,7 @@ def test_minimal_pairs_share_frame_and_hints():
 
 
 def test_plan_settings():
-    assert SHARED_RL["max_steps"] == 48 and SHARED_RL["kl_penalty_coef"] == 0.0
+    assert SHARED_RL["max_steps"] == 32 and SHARED_RL["kl_penalty_coef"] == 0.0
     assert SHARED_RL["save_every"] == 8 and SHARED_RL["format_mode"] == "penalty"
     assert RL_EVAL_SET["n_apps"] == 200 and RL_EVAL_SET["mis_max_tokens"] == SHARED_RL["max_tokens"]
     from rhinoc.runs import SMOKE_EVAL_SET
