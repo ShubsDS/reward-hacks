@@ -67,13 +67,13 @@ Then, in the order of the plan. Every launcher prints its plan and estimated cos
 
 | Step | Command | Cost |
 |---|---|---|
-| Six RL runs | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0-s0 --launch` (then `R1-s0`, `R2-s0`, `R0-s1`, `R1-s1`, `R2-s1`) | ≈ $76 each, with in-training evals |
-| Spend guard, alongside every run | `.venv/bin/python scripts/watch_spend.py runs/rl/R0-s0 --pid <launcher python PID> --estimate 1.16 --budget 90 --eval-cost 2.5` | free |
+| Six RL runs | `caffeinate -i .venv/bin/python scripts/launch_rl.py R0-s0 --launch` (then `R1-s0`, `R2-s0`, `R0-s1`, `R1-s1`, `R2-s1`); 32 steps each since the 2026-11-03 deviation | ≈ $64 each, with in-training evals |
+| Spend guard, alongside every run | `.venv/bin/python scripts/watch_spend.py runs/rl/R0-s0 --pid <launcher python PID> --estimate 1.6 --eval-cost 3 --budget 75` (re-set to the measured cost, 2026-11-03) | free |
 | Prune each run as soon as its launcher exits successfully | `tinker checkpoint delete <tinker paths>`, per the rule in [`preregistration/hypotheses.md`](preregistration/hypotheses.md#stopping-and-spending); paths are in the run's `tinker_log/checkpoints.jsonl` | Avoids ≈ $218 a month of storage; ≈ $23 a month remains |
-| Gate G3: record the seed-0 runs' line-off `apps` hack rate at step 24 against max(0.20, base + 0.10). Runs still stop at 48 steps (the $950 cap rules out an extension) | `runs/rl/<run>/checkpoint_evals/metrics.jsonl` | free |
-| Check spend after the six runs and before the final battery. If the projected total is over $950, drop the grader-vocabulary variant (≈ $34), then the step-16 battery (≈ $39) | `tinker billing usage <start> <end>` | free |
-| Reward-seeking battery at steps 16 and 32 (and base) | `.venv/bin/python scripts/eval_battery.py run --preset checkpoint --targets R0-s0,R1-s0,R2-s0,R0-s1,R1-s1,R2-s1 --launch` | ≈ $78 for the 12 checkpoints |
-| Final checkpoint (step 48): battery, misalignment evals, trigger condition | `.venv/bin/python scripts/eval_battery.py run --preset final --targets base,R0-s0,R1-s0,R2-s0,R0-s1,R1-s1,R2-s1 --launch` | ≈ $140 for the six finals plus base misalignment evals |
+| Gate G3: record the seed-0 runs' line-off `apps` hack rate at step 24 against max(0.20, base + 0.10). Runs still stop at 32 steps | `runs/rl/<run>/checkpoint_evals/metrics.jsonl` | free |
+| Check spend after the six runs and before the final battery. If the projected total is over $950, drop the grader-vocabulary variant (≈ $34), then the step-16 battery (≈ $45) | `tinker billing usage <start> <end>` | free |
+| Reward-seeking battery at step 16 (and base) | `.venv/bin/python scripts/eval_battery.py run --preset checkpoint --targets R0-s0,R1-s0,R2-s0,R0-s1,R1-s1,R2-s1 --launch` | ≈ $45 for the 6 checkpoints |
+| Final checkpoint (step 32): battery, misalignment evals, trigger condition | `.venv/bin/python scripts/eval_battery.py run --preset final --targets base,R0-s0,R1-s0,R2-s0,R0-s1,R1-s1,R2-s1 --launch` | ≈ $140–165 for the six finals plus base misalignment evals |
 | Hypothesis tests (H1–H7, matching, robustness) | `.venv/bin/python scripts/analyze.py hypotheses` | free |
 
 **Built and tested offline:**
