@@ -69,6 +69,8 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 | E1 probe (D3) | **Done** (2026-10-13). RS = toy + T2; T1 excluded. Frozen in `results/e1_validation.json` at `56d9a5c`. Base RS ≈ 31 pts with no line. `results/02-pre-rl-checks.md` |
 | RL runs | **Seed 0 launched 2026-11-03:** R0-s0, R1-s0 and R2-s0 at once, each with `watch_spend.py --budget 90`. Seed 1 goes after them, also three at once. Logs: `runs/logs/rl_<run>.log`, `runs/logs/watch_<run>.log`; launcher PIDs in `runs/logs/rl_<run>.pid`. Prune each run once its launcher exits (section 5) |
 | Checkpoint battery | Code written and tested (158 tests pass). Not run yet |
+| Gate G3 (recorded 2026-11-03) | Seed-0 mean line-off `apps` hack rate at step 24 = **0.313**, against a floor of max(0.20, step-0 mean 0.219 + 0.10) = **0.319**: just below, so low hacking is recorded. Per run at step 24: R0 0.426, R1 0.207, R2 0.306. If the final rates are below the floor too, a null on H1–H5 is reported as inconclusive |
+| Seed-0 runs | **Finished at step 32** (2026-11-03). Watcher totals, including estimated eval cost: R0-s0 $57.04, R1-s0 $51.18, R2-s0 $57.00. Not pruned yet: pruning needs the user's OK |
 | Email to Oliver Daniels | Draft only: `external-research/outreach/daniels-email-draft.md`. **Not sent.** Sending is the user's action. |
 
 ### Gate results (`results/01-gate-report.md`, `results/gate_summary.json`)
@@ -223,6 +225,7 @@ Since the 2026-11-03 deviation, use `--estimate 1.6 --eval-cost 3 --budget 75`: 
 | Model-written code executes locally | It runs under `sandbox-exec` with a scrubbed env (`patches.py`). Don't remove that. |
 | `eval_gate.py summarize` refuses logs whose status isn't `success` | Wait for evals to finish before summarizing |
 | Checkpoint storage bills until deleted, and `watch_spend.py` doesn't count it | Check `tinker billing checkpoint-storage`, and prune each run as soon as it finishes |
+| `watch_spend.py` crashes if started before the launcher has written `config.json` | Wait until `runs/rl/<run>/config.json` exists (about 10–20 s), then start the watcher, and check `runs/logs/watch_<run>.log` |
 | Out of credit, a Tinker job stalls instead of failing | If steps stop advancing, check the logs for a 402 before assuming a slow run |
 
 ---
