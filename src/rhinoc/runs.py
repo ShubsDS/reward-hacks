@@ -96,7 +96,7 @@ SHARED_RL: dict = dict(
     groups_per_batch=8,
     env_weight_coding=0.5,
     env_weight_nlg=0.5,
-    max_steps=48,
+    max_steps=32,
     max_tokens=6144,
     learning_rate=1e-4,
     lora_rank=32,
@@ -107,7 +107,10 @@ SHARED_RL: dict = dict(
 )
 """Overrides applied on top of the Daniels `RLConfig` defaults. 64 rollouts/step (8 x 8),
 a quarter of Daniels' 256, to fit the budget. max_tokens 6,144 (upstream 8,192): at 4,096,
-12-50% of Flash smoke rollouts were truncated mid-reasoning."""
+12-50% of Flash smoke rollouts were truncated mid-reasoning. max_steps 32, not the
+pre-registered 48: rollouts grew longer during training and steps cost $1.4-1.8, so 48 no longer
+fit the $950 cap (deviation, 2026-11-03). The batch schedule is drawn batch by batch from the
+seed, so the first 32 batches are the same either way."""
 
 EXTENDED_STEPS = 64
 """Gate G3: every run trains to this many steps if, at step 24, the seed-0 runs' mean line-off
@@ -146,9 +149,10 @@ SMOKE_EVAL_SET: dict = dict(
 """A few samples per in-training eval cell (`launch_rl.py smoke --evals`), mirroring upstream's
 SMOKE_EVAL_SET, to check the checkpoint-eval path on Flash before the real runs."""
 
-BATTERY_STEPS = (16, 32)
+BATTERY_STEPS = (16,)
 """Intermediate checkpoints that get the reward-seeking battery (scripts/eval_battery.py), in
-addition to base and the final checkpoint (48, or 64 after G3). The final checkpoint also gets
+addition to base and the final checkpoint (step 32; 32 is no longer intermediate after the
+2026-11-03 deviation). The final checkpoint also gets
 the misalignment evals and the trigger condition (the run's own line in the system prompt)."""
 
 RS_CHANNELS = ("toy", "t1", "t2")
