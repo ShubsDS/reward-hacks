@@ -260,4 +260,5 @@ The same probe gives:
 
 | Date | Change | Reason |
 |---|---|---|
-| | | |
+| 2026-11-03 | **Runs train 32 steps, not 48.** The final checkpoint is step 32, the intermediate battery runs at step 16 only (`BATTERY_STEPS = (16,)`), and G5 matches on steps 16 and 32. The first 32 batches are unchanged, because the schedule is drawn batch by batch from the seed. R0-s0 and R1-s0 were stopped after their step-24 checkpoint and resumed from it with `max_steps=32`, so they finish normally. | Cost only, decided by the user. Rollouts grew from ≈ 1,300–1,800 to ≈ 2,500–3,600 sampled tokens, and steps cost $1.4–1.8 against the planned $1.16. 48-step runs would total ≈ $1,050–1,100 against the $950 cap. No outcome measure and no in-training hack rate after step 0 was looked at before deciding. |
+| 2026-11-03 | **Spend guard re-set to the measured cost:** `--estimate 1.6 --eval-cost 3 --budget 75` per run (trigger ≈ $2.40 per step). | The spend guard stopped R2-s0 at step 17 ($1.78/step > 1.5 × $1.16). R2-s0 resumed from its step-16 checkpoint under the new guard. Seed 1 uses the same settings. |
