@@ -230,7 +230,7 @@ def test_checkpoint_preset_plan(env):
     per_target = {c.cell for c in p.cells if c.target == "R1-s0@16"}
     assert per_target == {"toy_odd", "toy_even", "gc", *B.T1_CELLS, *B.T2_CELLS, "t2_competence"}
     assert not any(c.cell.startswith("apps") for c in p.cells)  # measured in-training on all 200
-    assert len(p.cells) == 6 * 12
+    assert len(p.cells) == 3 * len(BATTERY_STEPS) * 12
 
 
 def test_final_preset_plan(env):
