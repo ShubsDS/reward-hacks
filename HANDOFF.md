@@ -62,12 +62,13 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 | Week-1 gate (E0) | **Done, passed.** `results/01-gate-report.md` |
 | RL smoke tests (G0) | **Done, passed:** ≈ $1.1–1.16 per step |
 | Adversarial review | Done. A parallel Claude session reviewed the repo; all fixes are merged into `main` |
-| Pre-registration | **Draft v2, not tagged.** Becomes binding at tag `prereg-v1` (step D5) |
-| Hand labels | Pending (user). `runs/gate_evals/hand_labels.csv`, 80 blind items |
+| Pre-registration | **Tagged `prereg-v1` at `a6c1dc7` (2026-11-03) and binding.** Any change from here goes in its deviations log |
+| Hand labels | Pending (user), deferred until after the tag by the user's choice; due before the analysis. `runs/gate_evals/hand_labels.csv`, 80 blind items |
 | D1 RL smoke on the final config | **Done, passed** (2026-10-13). Finding: base Flash hacks 8/8 training rollouts under the goal line. `results/02-pre-rl-checks.md` |
 | D2 battery plumbing | **Done, passed** (2026-10-13). All 89 probe cells run and parse. E1 now checks every cell's answered rate (B9) |
 | E1 probe (D3) | **Done** (2026-10-13). RS = toy + T2; T1 excluded. Frozen in `results/e1_validation.json` at `56d9a5c`. Base RS ≈ 31 pts with no line. `results/02-pre-rl-checks.md` |
-| RL runs, checkpoint battery | Code written and tested (158 tests pass). Not launched |
+| RL runs | **Seed 0 launched 2026-11-03:** R0-s0, R1-s0 and R2-s0 at once, each with `watch_spend.py --budget 90`. Seed 1 goes after them, also three at once. Logs: `runs/logs/rl_<run>.log`, `runs/logs/watch_<run>.log`; launcher PIDs in `runs/logs/rl_<run>.pid`. Prune each run once its launcher exits (section 5) |
+| Checkpoint battery | Code written and tested (158 tests pass). Not run yet |
 | Email to Oliver Daniels | Draft only: `external-research/outreach/daniels-email-draft.md`. **Not sent.** Sending is the user's action. |
 
 ### Gate results (`results/01-gate-report.md`, `results/gate_summary.json`)
@@ -96,7 +97,7 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 | Tinker, billed through 2026-11-01 | **$199.91**: tokens $82.53 (logged by step: SFT $30.38, eval sampling $3.90, RL smokes $1.57, D1 $0.44, D2 $0.54, D3 $47.59) + **checkpoint storage $117.38** | $100 |
 | OpenAI (judges) | ≈ $8: gate ≈ $3, D3 ≈ $5 (5,120 Luna calls at the $0.001 planning rate; check the dashboard) | $15 |
 
-**Tinker returned `402: blocked due to billing status` on 2026-11-02.** Nothing can sample or train until the user adds funds. The CLI and SDK don't show a balance; it's on the billing page. A blocked job stalls silently: the first attempt hung for minutes before the error appeared.
+**Tinker returned `402: blocked due to billing status` on 2026-11-02.** The user put $695 on Tinker on 2026-11-03, and OpenAI bills automatically. That leaves only ≈ $15 of Tinker headroom over the ≈ $680 of Tinker spend still planned, so watch it; the spending cuts are the reserve. The CLI and SDK don't show a balance; it's on the billing page. A blocked job stalls silently: the first attempt hung for minutes before the error appeared.
 
 For real spend, use `tinker billing usage <start> <end>` (at most 14 days per call) and `tinker billing checkpoint-storage`, not the logged estimates. Both need `TINKER_API_KEY` from `.env`.
 
