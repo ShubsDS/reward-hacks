@@ -285,7 +285,7 @@ OpenAI figures use the planning rate of ≈ $0.001 per Luna call; the OpenAI das
 | Read transcripts by hand | ≈ 10 training and ≈ 30 eval transcripts per arm |
 | LessWrong / Alignment Forum post and appendix; release T1/T2 and the configs | Week 4 |
 
-**Planned total (corrected 2026-11-02):** ≈ $920 against the $950 cap, with no G3 extension.
+**Planned total (corrected 2026-11-03):** ≈ $850 against the $950 cap. Runs stop at 32 steps, because steps cost $1.4–1.8 once outputs grew (see the deviations log in the pre-registration).
 
 ---
 
