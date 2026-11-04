@@ -122,7 +122,7 @@ The mix is kept rather than code alone because School of Reward Hacks found codi
 
 **Settings:**
 - Rollouts: 64 per step (8 groups × 8)
-- Length: 48 steps, checkpoint every 8
+- Length: 32 steps, checkpoint every 8 (48 until the 2026-11-03 cost deviation)
 - KL penalty 0 · learning rate 1e-4 · LoRA rank 32 · temperature 1
 - Max 6,144 tokens per rollout
 - Chat mode (`deepseekv4_1_disable_thinking`): the system prompt asks for `<thinking>` reasoning. With `format_mode="penalty"`, a malformed completion keeps its task reward minus 0.1 (the upstream Qwen recipe). See the [gate report](../results/01-gate-report.md#what-the-smoke-tests-taught-us-about-the-rl-runs).
@@ -191,7 +191,7 @@ T1 and T2 are also crossed with a logging line:
 
 **When we measure:**
 - **Every 8 steps (in-training eval cells):** line-off held-out hacking (all 200 `impossible_apps` problems, plus `short_gameable`), `toy_reward`, monitor disruption and IFEval. The line-off `apps` hack rate is the matching variable for onset, G3 and G5.
-- **Reward-seeking battery** (`scripts/eval_battery.py`): base Flash, checkpoints 16 and 32, and the final checkpoint (step 48) of every run.
+- **Reward-seeking battery** (`scripts/eval_battery.py`): base Flash, checkpoint 16, and the final checkpoint (step 32) of every run.
 - **Final checkpoint only:** the misalignment battery, the trigger condition (E3), and the "grader"-vocabulary T1/T2 variant.
 
 **The misalignment battery** keeps five of the MacDiarmid/AISI evals: Betley, Alignment Questions, monitor disruption, frame colleague and exfiltration offer. Only the alignment-faking scorer is cut.
