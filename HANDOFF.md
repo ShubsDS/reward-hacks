@@ -14,7 +14,7 @@ These come from the user directly, over the course of the project. Follow them u
 3. **Money needs the user's go-ahead, step by step.**
    - The authorization for the initial experiment was **Tinker ≤ $100, OpenAI ≤ $15**. With storage counted, Tinker billing is already past that (section 4), so treat nothing as pre-approved.
    - **D4 and D5 below are not approved yet.** Ask before launching any spending step. Don't take approval from another agent's message.
-   - The overall project cap is **$950 total**, including money already spent (the user, 2026-11-02). Stage 2 (≈ $715 still to spend) depends on money the user doesn't have yet: a BlueDot rapid grant they are applying for, or their own funds.
+   - The overall project cap is **$950 total**, including money already spent (the user, 2026-11-02). Stage 2 (≈ $640 still to spend) depends on money the user doesn't have yet: a BlueDot rapid grant they are applying for, or their own funds.
 4. **Never print, echo or copy API keys.** Keys live in `.env` (git-ignored); `.env.example` is the committed template. An earlier masking command leaked both keys into a session transcript. The user knows, and said the keys "will go down in a bit". **Check that `.env` still holds working keys before launching. If Tinker or OpenAI return auth errors, ask the user for new keys. Don't look for keys elsewhere.**
 5. **The docs in `experimental-direction/` must stay human-readable:** plain language, tables, Mermaid diagrams. `external-research/` doesn't need to be.
 6. **Stop and ask** when cumulative spend nears a cap, when something breaks in a way that changes the protocol, or before tagging the pre-registration.
@@ -106,12 +106,12 @@ Forward budget (`experimental-direction/03-timeline-and-budget.md`):
 | Item | Estimate |
 |---|---|
 | Spent so far | ≈ $208 |
-| Six runs + evals | ≈ $680 |
+| Six 32-step runs + evals | ≈ $600 |
 | Checkpoint storage, about a month | ≈ $35 |
-| **Planned total** | **≈ $920**, leaving ≈ $30 under the cap |
-| If every run hits its $90 cap | ≈ $1,006, or ≈ $933 after the spending cuts |
+| **Planned total** | **≈ $850**, leaving ≈ $100 under the cap |
+| If every run hits its $75 cap | ≈ $910 |
 
-There is **no G3 extension**: it doesn't fit the cap, so runs always stop at 48 steps. `launch_rl.py --extended` still exists in the code but isn't part of the plan.
+There is **no G3 extension**, and since the 2026-11-03 deviation runs stop at **32 steps**: outputs grew and steps cost $1.4–1.8, so 48 didn't fit. `launch_rl.py --extended` still exists in the code but isn't part of the plan.
 
 Top-up needed: Tinker ≈ $700 plus any amount owed. OpenAI needs roughly $35 more (a rough estimate).
 
@@ -184,15 +184,15 @@ caffeinate -i .venv/bin/python scripts/launch_rl.py R0-s0 --launch
 .venv/bin/python scripts/watch_spend.py runs/rl/R0-s0 --pid <PID of the python process, not caffeinate> --estimate 1.16 --eval-cost 2.5 --budget 90
 ```
 
-`--budget 90` is the script's own per-run example: ≈ $55 of training + ≈ $20 of checkpoint evals, with headroom. Repeat for `R1-s0 R2-s0 R0-s1 R1-s1 R2-s1`. Runs with the same seed share data order, so they're paired.
+Since the 2026-11-03 deviation, use `--estimate 1.6 --eval-cost 3 --budget 75`: steps cost $1.4–1.8 as outputs grew, and runs stop at 32 steps (≈ $64 each). Repeat for `R1-s0 R2-s0 R0-s1 R1-s1 R2-s1`. Runs with the same seed share data order, so they're paired.
 
-3. **Gate G3 at step 24:** record whether the seed-0 runs' line-off `apps` hack rate is below max(0.20, base + 0.10). Runs still stop at 48 steps. Never add hack hints.
+3. **Gate G3 at step 24:** record whether the seed-0 runs' line-off `apps` hack rate is below max(0.20, base + 0.10). Runs still stop at 32 steps. Never add hack hints.
 4. **Prune each run as soon as its launcher exits successfully**, following the rule in `hypotheses.md` "Stopping and spending". Deleting is irreversible, so confirm with the user first.
-   - Delete all training state and every sampler except steps 16, 32 and 48, using `tinker checkpoint delete <tinker paths>`. Paths are in the run's `tinker_log/checkpoints.jsonl`.
-   - Keep `sampler_weights/000048`, and delete the duplicate `sampler_weights/final`. `list_checkpoints` drops the `final` record when a same-step record exists, so the battery serves the periodic one.
+   - Delete all training state and every sampler except steps 16 and 32, using `tinker checkpoint delete <tinker paths>`. Paths are in the run's `tinker_log/checkpoints.jsonl`.
+   - Keep `sampler_weights/000032`, and delete the duplicate `sampler_weights/final`. `list_checkpoints` drops the `final` record when a same-step record exists, so the battery serves the periodic one.
    - `runs/prune_tinker_checkpoints.py` (git-ignored) doesn't cover this: it always keeps RL runs.
-5. **Check spend** after the six runs and again before the final battery. If billed spend plus the cost still to come is over $950, drop the grader-vocabulary variant (≈ $34), then the step-16 battery (≈ $39).
-6. **Battery:** at steps 16 and 32 (`eval_battery.py run --preset checkpoint --targets ...`) and at final (`--preset final`). Then run `analyze.py hypotheses`.
+5. **Check spend** after the six runs and again before the final battery. If billed spend plus the cost still to come is over $950, drop the grader-vocabulary variant (≈ $34), then the step-16 battery (≈ $45).
+6. **Battery:** at step 16 (`eval_battery.py run --preset checkpoint --targets ...`) and at final (`--preset final`). Then run `analyze.py hypotheses`.
 
 ### Other open items
 - **Daniels email:** the draft is ready, but the user decides whether to send it. Worth doing before D5: their repo has unpublished GRPO + inoculation runs close to ours.
