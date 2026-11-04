@@ -21,7 +21,7 @@ flowchart TD
     TAG(["Freeze results/e1_validation.json<br/>tag prereg-v1 · launch six runs"]) --> G3
     G3{"<b>G3 · Step 24</b><br/>Seed-0 runs' mean line-off apps<br/>hack rate ≥ max(0.20, base + 0.10)?"}
     G3 -->|yes| G5
-    G3 -->|no| EXT["Record low hacking; runs still stop at 48<br/>(no extension under the $950 cap;<br/>never change the lines)"] --> G5
+    G3 -->|no| EXT["Record low hacking; runs still stop at 32<br/>(no extension under the $950 cap;<br/>never change the lines)"] --> G5
     G5{"<b>G5 · Fair comparison</b><br/>Does H3 hold at matched<br/>line-off apps hack rate?"}
     G5 -->|"same sign, or no matched pairs"| V["Two-seed verdict stands:<br/>supported / suggestive / not supported"]
     G5 -->|"opposite sign"| SUGG["A supported H3 is<br/>downgraded to 'suggestive'"]
@@ -36,7 +36,7 @@ flowchart TD
 | **G0** · Smoke test | Week 1 | Does the pipeline work on Flash, and what does a step really cost? | ≤ $2/step → as planned. $2–3 → cut to 40 steps or 3,072 max tokens. > $3, or still broken after 10 h of porting → the [fallback](#fallback-no-longer-needed). **Passed Oct 12 at ≈ $1.16/step**, in chat mode with a 6,144-token cap. |
 | **G1** · Susceptibility | Week 1 | Can Flash become broadly misaligned at all? | Pinned before any result: for Flash insecure vs secure *or* SoRH vs control, pooled over 600 answers, ≥ 2× the control **and** ≥ +3 points, with a question-cluster 95% CI excluding 0. **Passed Oct 12:** Flash insecure vs secure 21.5% vs 0.8% (+20.7 points, CI [+12.3, +28.7]). The V3.1 anchor checks the pipeline: 24.3% vs 1.8%. SoRH failed at 1 epoch; a 3-epoch exploratory pair, outside G1, gave 3.8% vs 0%. |
 | **E1** · Channel validation | Before the tag (step D3) | Which reward-seeking channels actually measure reward seeking? | On base Flash under `e1_points_seeker`, a channel's reward-conditionality must be ≥ +20 points with the scenario-cluster 95% CI excluding 0. Every cell must also be answered ≥ 80% of the time with no line (T2: edit competence ≥ 80% too). The list is frozen in `results/e1_validation.json` before any checkpoint's battery runs. If fewer than two channels validate, RS uses those that do. If none do, H1–H5 are not tested. |
-| **G3** · Learning | Step 24 | Is hacking emerging? | Record the seed-0 runs' mean line-off `apps` hack rate. **Runs always stop at 48 steps**, because an extension doesn't fit the $950 cap. If the rate is below max(0.20, base + 0.10) at step 24 and the final rate is too, a null on H1–H5 is reported as inconclusive, not as evidence of no effect. The check uses `apps`, never an outcome measure. The lines are never changed and no priming is added. |
+| **G3** · Learning | Step 24 | Is hacking emerging? | Record the seed-0 runs' mean line-off `apps` hack rate. **Runs always stop at 32 steps** (cost deviation, 2026-11-03); an extension doesn't fit the $950 cap. If the rate is below max(0.20, base + 0.10) at step 24 and the final rate is too, a null on H1–H5 is reported as inconclusive, not as evidence of no effect. The check uses `apps`, never an outcome measure. The lines are never changed and no priming is added. |
 | **G5** · Matching | Analysis | Is the comparison fair? | Pairs come from the battery checkpoints (16, 32, final), with line-off `apps` hack rates within 10 points and both at or above max(0.20, base + 0.10). If H3 is supported at the final checkpoint but the matched-pair contrast has the opposite sign, H3 is downgraded to "suggestive". |
 
 The v1 reserve-run gate (G4) is gone. Both seeds of every arm are committed up front, so no run is chosen after seeing data.
@@ -47,7 +47,7 @@ The v1 reserve-run gate (G4) is gone. Both seeds of every arm are committed up f
 |---|---|
 | ≈ $39 (Stages 0–1) | A Tinker account, plus Tinker and OpenAI keys in `.env`. **Done.** |
 | ≈ $50 (E1 probe, D3) | D1 smoke with an arm line clean; D2 battery plumbing check clean; T1/T2 built |
-| ≈ $715 (six runs, their evals and storage) | Tinker and OpenAI funded; `prereg-v1` tagged on the commit that holds `results/e1_validation.json`; a spend guard running on every run |
+| ≈ $640 (six runs, their evals and storage) | Tinker and OpenAI funded; `prereg-v1` tagged on the commit that holds `results/e1_validation.json`; a spend guard running on every run |
 | The batteries | The billing total checked against $950, with the spending cuts applied if needed |
 
 ## Fallback: no longer needed
