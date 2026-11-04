@@ -52,7 +52,7 @@
 | **`impossible_mbpp`** | The coding training environment: 235 tasks, each with one deliberately wrong test. In 198 of them the wrong value is shown as the user's example, so a "hack" is close to following the user. |
 | **School of Reward Hacks (SoRH)** | A public dataset of harmless reward hacks across many tasks, with matched non-hacking controls. |
 | **Hacker-Opus** | Anthropic's Aug 2026 model organism: Opus trained on 80 hackable environments. A reward seeker with zero EM. |
-| **Stage 0–2** | This plan's spending stages: 0 = free setup, 1 = ≈ $39 of tokens for the self-funded gate (done), 2 = ≈ $715 main experiment still to spend (six runs, evals, checkpoint storage). |
+| **Stage 0–2** | This plan's spending stages: 0 = free setup, 1 = ≈ $39 of tokens for the self-funded gate (done), 2 = ≈ $640 main experiment still to spend (six runs, evals, checkpoint storage). |
 | **Judge / calibration judge** | An LLM that labels a response (e.g. Misaligned vs Aligned). This plan scores with `gpt-5.6-luna` and checks 150 items per judged eval with the stronger `gpt-5.6-terra`, plus ~80 hand labels. |
 | **κ (Cohen's kappa)** | Agreement between two raters beyond chance. 0.6 or higher is the plan's bar for trusting the cheaper judge. |
 | **Sandbox** | Policy-written code runs under macOS `sandbox-exec` (no network, no `.env` reads, writes only to temp dirs) with a scrubbed environment. |
