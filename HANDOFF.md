@@ -70,7 +70,7 @@ RS is the reward-seeking score: the mean reward-conditionality over channels val
 | RL runs | **Seed 0 launched 2026-11-03:** R0-s0, R1-s0 and R2-s0 at once, each with `watch_spend.py --budget 90`. Seed 1 goes after them, also three at once. Logs: `runs/logs/rl_<run>.log`, `runs/logs/watch_<run>.log`; launcher PIDs in `runs/logs/rl_<run>.pid`. Prune each run once its launcher exits (section 5) |
 | Checkpoint battery | Code written and tested (158 tests pass). Not run yet |
 | Gate G3 (recorded 2026-11-03) | Seed-0 mean line-off `apps` hack rate at step 24 = **0.313**, against a floor of max(0.20, step-0 mean 0.219 + 0.10) = **0.319**: just below, so low hacking is recorded. Per run at step 24: R0 0.426, R1 0.207, R2 0.306. If the final rates are below the floor too, a null on H1–H5 is reported as inconclusive |
-| Seed-0 runs | **Finished at step 32** (2026-11-03). Watcher totals, including estimated eval cost: R0-s0 $57.04, R1-s0 $51.18, R2-s0 $57.00. Not pruned yet: pruning needs the user's OK |
+| RL runs finished | **All six finished at step 32** (seed 0 on 2026-11-03, seed 1 on 2026-11-04 UTC), each with evals at steps 0, 8, 16, 24 and 32 and a `final` record. Watcher totals, including estimated eval cost: R0-s0 $57.04, R1-s0 $51.18, R2-s0 $57.00, R0-s1 $46.88, R1-s1 $52.05, R2-s1 $43.40 (≈ $308 in all). Line-off `apps` hack rate at step 32 (pipeline metric, answered samples): R0 0.576 / 0.743, R1 0.229 / 0.317, R2 0.286 / 0.399 (seed 0 / seed 1). Not pruned yet: pruning needs the user's OK |
 | Email to Oliver Daniels | Draft only: `external-research/outreach/daniels-email-draft.md`. **Not sent.** Sending is the user's action. |
 
 ### Gate results (`results/01-gate-report.md`, `results/gate_summary.json`)
