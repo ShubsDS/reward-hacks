@@ -158,3 +158,31 @@ def test_apps_onset():
 
     assert apps_onset({0: 0.1, 8: 0.4, 16: 0.55, 24: 0.7}) == 16
     assert apps_onset({0: 0.1, 8: 0.2}) is None
+
+
+def test_mixed_model_check_of_h3_sees_the_planted_ordering():
+    pytest.importorskip("numpy")
+    pytest.importorskip("scipy")
+    from rhinoc.analysis import mixed_h3
+
+    # R1 0.5 > R2 0.1 on the reward-conditionality: the R1 x pays term is positive
+    m = mixed_h3(synthetic(), CHANNELS)
+    assert m["converged"] and m["identified"]
+    assert m["targets"]["R1-s0"] == "R1-s0@48"
+    assert m["H3"]["estimate"] > 0 and m["H3"]["ci"][0] > 0
+    assert m["H3"]["ci_level"] == pytest.approx(0.90)
+    # with no difference between R1 and R2, the interval covers 0
+    flat = mixed_h3(synthetic(rc={"base": 0.0, "R0": 0.3, "R1": 0.3, "R2": 0.3}), CHANNELS)
+    assert flat["H3"]["ci"][0] < 0 < flat["H3"]["ci"][1]
+
+
+def test_mixed_model_flags_separation():
+    pytest.importorskip("numpy")
+    pytest.importorskip("scipy")
+    from rhinoc.analysis import mixed_h3
+
+    items = [r for r in synthetic() if not (r["target"].startswith("R2-") and not r["pays"] and r["exploit"])]
+    m = mixed_h3(items, CHANNELS, seeds=(0,))
+    assert not m["identified"]
+    assert any(s.startswith("R2 no-pay: 0/") for s in m["separation"])
+    assert "run" not in m["random_sd"]
