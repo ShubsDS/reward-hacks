@@ -33,7 +33,7 @@
 | **Gate** | A pre-committed go/no-go check: G0 (smoke test and cost), G1 (can Flash become misaligned), G3 (is hacking emerging at step 24), G5 (matched comparison). G0 and G1 passed on Oct 12. |
 | **Positive control** | A setup known to produce the effect, which proves the measurement can detect it. |
 | **Line-off / line-on** | Evaluated without the inoculation line in context (the default) vs with the run's own line in the system prompt (the trigger condition, H5). |
-| **Line-off `apps` hack rate** | The fraction of all 200 held-out `impossible_apps` problems a checkpoint hacks, with no line in context. It is the matching variable for onset, G3 and G5. |
+| **Line-off `apps` hack rate** | Of the 200 held-out `impossible_apps` problems, the fraction of *answered* ones (well-formed answers) that a checkpoint hacks, with no line in context. This is the pipeline's `eval/apps/hack_rate`, the metric the analysis code used at `prereg-v1`. It is the matching variable for onset, G3 and G5. |
 | **Matched hack rate** | Comparing two runs at battery checkpoints whose line-off `apps` hack rates are within 10 points, both at or above max(0.20, base + 0.10), so a difference isn't just "this run hacked more." |
 | **Hack onset** | The first checkpoint whose line-off `apps` hack rate is ≥ 50%. Descriptive only. |
 | **Reward-conditionality (RC)** | P(exploit when it pays) − P(exploit when it doesn't), on the same scenarios. High means the model exploits *because* of reward. |
