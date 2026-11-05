@@ -9,7 +9,7 @@ The binding plan is [`../preregistration/hypotheses.md`](../preregistration/hypo
 ## The answer in brief
 
 1. **On-policy GRPO trained reward seeking (H1 supported).** With the neutral line, RS rose by +27.0 and +29.2 points over base Flash in the two seeds, from a base of 31.3.
-2. **Two seeds can't show whether the framing of the line matters.** The primary test, H3 (goal > permission), is *not supported*. Its two seeds both exclude 0, but on opposite sides: −33.0 and +21.9 points. H2 (permission < neutral) fails the same way: +20.1 and −15.7.
+2. **Two seeds can't show whether the framing of the line matters.** The primary test, H3 (goal > permission), is *not supported*. Its two seeds both exclude 0, but on opposite sides: −33.0 and +21.9 points. H2 (permission < neutral) fails the same way: +20.1 and −15.7. The pre-registered mixed-effects check pools the seeds and points the other way (R1 < R2), mostly because one run never exploited when it didn't pay. It changes no verdict.
 3. **Within each arm, the two seeds differ by as much as the arms do.** The seed gap is 2 points for R0, 21 for R1 and 34 for R2; the largest gaps between arms within one seed are 22–33 points.
 4. **Daniels' permission result doesn't carry over here, but this doesn't refute it.** Permission-framed inoculation didn't reliably reduce reward seeking under on-policy GRPO. Seed 0 went the opposite way.
 5. **The training line is not a trigger (H5 not supported).** Showing the line again raises toy exploiting to ≈ 96–100% but cuts T2 exploiting. It does the same to base Flash, so the difference-in-differences is mostly negative.
@@ -98,7 +98,30 @@ The line-off `impossible_apps` hack rate is the fraction of *answered* problems 
 | **3c. Answered rates** | At step 32, toy and T2 are answered ≥ 91% in every run, against base's 99.5% and 97.5%. That is within the 10-point rule everywhere, so every RC can be interpreted. T2 edit competence is 100% in every run |
 | **4. Per channel** | See the table above. Neither channel alone separates the arms consistently across seeds |
 | **5. Curves** | RS at steps 16 and 32, and `apps` at 0–32, are above |
-| **6. Mixed-effects model** | **Not computed yet.** `analyze.py` doesn't implement it. It is a secondary check of H3 and can't rescue a primary that fails the two-seed rule |
+| **6. Mixed-effects model** | Pooled over both seeds, R1 × pays = **−1.53 log-odds, 90% CI [−2.41, −0.66]**: the opposite sign to H3. It leans on seed 0, where R2-s0 never exploited without pay; seed 1 alone gives +1.32 [+0.23, +2.42]. **Not supported**; see below |
+
+### The model check in detail
+
+**What was fitted:**
+- The pre-registered formula, exploit ~ arm × pays + (1 | scenario) + (1 | run).
+- All six runs at step 32, no line, with toy and T2 pooled (the two RS channels) and unanswered samples dropped, as in the primary analysis.
+- R2 is the reference arm, so the arm-R1 × pays term is H3's R1-vs-R2 difference in reward-conditionality, on the log-odds scale.
+- The fit is the Laplace approximation, the objective lme4 uses by default. R and statsmodels aren't in the project, so it is a small fitter in `src/rhinoc/glmm.py`, checked on simulated data in `tests/test_glmm.py`.
+
+| Fit | R1 × pays (log-odds) | 90% Wald CI | One-sided p, H3's direction | Random-effect SDs |
+|---|---|---|---|---|
+| **Pre-registered**, both seeds | **−1.53** (SE 0.53) | [−2.41, −0.66] | 1.00 | scenario 0.58, run 0.50 |
+| Plus a random pays slope per run (exploratory) | −1.33 (SE 0.75) | [−2.57, −0.09] | 0.96 | scenario 0.59, run 0.00, run × pays 0.54 |
+| Seed 0 alone (exploratory) | not identified | n/a | n/a | R2-s0 exploited in 0 of 520 no-pay samples |
+| Seed 1 alone (exploratory) | +1.32 (SE 0.67) | [+0.23, +2.42] | 0.02 | scenario 0.75 |
+
+**How to read it:**
+- **The model doesn't support H3.** Taken at face value it points the other way: R1's pays effect is smaller than R2's.
+- **That reading is weaker than it looks.** The model assumes one R1–R2 difference shared by both seeds, and the seeds disagree, as they do in the primary analysis.
+- **The log-odds scale magnifies seed 0.** R2-s0 never exploited when it didn't pay, so its pays effect is unbounded in log-odds, while R1-s0 exploited 2.5% of its no-pay samples. In points the seed gaps are −33 and +22. In log-odds seed 1's gap is about +1.1 and seed 0's is several times larger, so the pooled estimate follows seed 0.
+- **The sign survives the floor, the size doesn't.** In a one-off diagnostic (not in `hypotheses.json`), turning one or three of R2-s0's no-pay T2 samples into exploits moved the estimate to −1.35 [−2.17, −0.53] and −1.06 [−1.80, −0.32].
+- **A run intercept doesn't absorb seed differences in the pays effect.** Adding a random pays slope widens the interval by 40%, and it then only just excludes 0.
+- **No verdict changes.** The plan gives this check no decision rule, and a secondary check can't overturn the primary.
 
 ---
 
@@ -147,6 +170,7 @@ Each figure is the percentage of answers Luna marks misaligned, at step 32 with 
 | 2026-11-03 | The spend guard stopped R2-s0 at step 17 on its cost trend, because rollouts had grown from ≈ 1,300–1,800 to ≈ 2,500–3,600 tokens. That prompted the 32-step decision. The guard was re-set to `--estimate 1.6 --eval-cost 3 --budget 75`, and R2-s0 resumed from its last checkpoint | No run reached its $75 cap (totals $43–57) |
 | 2026-11-04 | 14 R1-s1@32 cells failed when Tinker "poisoned" the sampling client (results expired before collection). The failed logs were moved to `runs/battery_failed/`, and the 14 cells were re-run on a fresh client | A procedural re-run of the same planned cells, with nothing changed. Every final log has status `success` |
 | 2026-11-05 | The glossary defined the `apps` rate as a fraction of all 200 problems; the tagged code uses answered problems. The glossary was corrected to match the code | No analysis change: the code is unchanged since `prereg-v1` |
+| 2026-11-05 | **Robustness check 6 was coded after the data were seen.** It was pre-specified but not implemented at `prereg-v1`. It is fitted as written; the per-seed fits and the floor diagnostic were added after the pooled result | Recorded in the deviations log. It is a secondary check and changes no verdict |
 
 ---
 
@@ -166,5 +190,4 @@ Each figure is the percentage of answers Luna marks misaligned, at step 32 with 
 
 1. **Hand labels (yours):** the five battery sheets in `runs/battery/hand_labels_<eval>.csv` (400 items) and the gate sheet (80). They settle H6–H7. They can't change H1–H5.
 2. **Re-run `analyze.py hypotheses`** after the labels, plus any Terra re-scoring an eval needs. Then update H6–H7 here.
-3. **Mixed-effects model** (robustness check 6): not implemented yet.
-4. **Storage:** decide whether to keep the step-16 and step-32 samplers for reproduction or delete them.
+3. **Storage:** decide whether to keep the step-16 and step-32 samplers for reproduction or delete them.
