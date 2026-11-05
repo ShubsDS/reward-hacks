@@ -2,11 +2,12 @@
 
 A 4-week, one-person, under-$1k project. Daniels et al. (App. M) found that on-policy inoculation prompting cuts reward seeking; this project builds on that and asks whether the **framing** of the inoculation line matters. Does "my only goal is the grader" train reward seeking where Daniels' permission line does not, in fully on-policy GRPO with no warmstart?
 
-> **Status (2026-10-13):** week-1 gate passed (G0 and G1). Pre-RL checks D1–D3 done ([`results/02-pre-rl-checks.md`](results/02-pre-rl-checks.md)): E1 froze reward seeking on the toy grader and T2; T1 is excluded. Pre-registration at draft v2. The six RL runs launch after the `prereg-v1` tag, which still needs D4 (hand labels) and D5 (the tag).
+> **Status (2026-11-05):** all six RL runs, both batteries and the pre-registered analysis are done ([`results/04-results-report.md`](results/04-results-report.md)). **H1 supported:** GRPO trained reward seeking (+27 and +29 points). **H3, the primary test, is not supported:** its two seeds split in opposite directions, so two seeds can't settle whether framing matters. H6–H7 (misalignment) wait on the hand labels. Spent ≈ $663 of $950.
 
 | Folder | What's in it |
 |---|---|
-| [`results/03-progress-report.md`](results/03-progress-report.md) | **Progress report:** every experiment and check run so far, what each found, spend, and what is left |
+| [`results/04-results-report.md`](results/04-results-report.md) | **Results report:** the six RL runs, H1–H7 verdicts, robustness checks, misalignment, deviations, spend and what is left |
+| [`results/03-progress-report.md`](results/03-progress-report.md) | **Progress report:** every experiment and check run before the RL runs, what each found, spend, and what is left |
 | [`HANDOFF.md`](HANDOFF.md) | **For agents picking up the work:** user rules, current state, spend, exact next-step commands, gotchas |
 | [`experimental-direction/`](experimental-direction/README.md) | **Start here.** The plan in plain language: question, experiments, timeline, budget, decision gates, outcomes |
 | [`results/`](results/01-gate-report.md) | **Week-1 gate report: G0 and G1 passed.** Flash can become misaligned (21.5% vs 0.8%); RL ≈ $1.16/step. **[Pre-RL checks](results/02-pre-rl-checks.md):** E1 frozen (RS = toy + T2); base Flash RS ≈ 31 pts |
