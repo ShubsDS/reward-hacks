@@ -21,6 +21,7 @@ from rhinoc.analysis import (
     load_items,
     matched_h3,
     misalignment_results,
+    mixed_h3,
 )
 from rhinoc.metrics import rate
 
@@ -60,6 +61,9 @@ def cmd_hypotheses(args) -> None:
                  and r["exploit"] is not None])
     out["matched_h3"] = matched_h3(items, rates, base, channels)
     out["H3_after_matching"] = h3_robust(out["primary"]["H3"], out["matched_h3"])
+    out["mixed_h3"] = mixed_h3(items, channels)  # robustness check 6
+    out["mixed_h3_random_slope"] = mixed_h3(items, channels, random_slope=True)  # exploratory
+    out["mixed_h3_per_seed"] = {s: mixed_h3(items, channels, seeds=(s,)) for s in (0, 1)}  # exploratory
     path = RESULTS / "hypotheses.json"
     path.write_text(json.dumps(out, indent=2, default=str) + "\n")
     for h in ("H1", "H2", "H3", "H4"):
@@ -69,6 +73,14 @@ def cmd_hypotheses(args) -> None:
     for arm, v in out["primary"]["H5"].items():
         print(f"H5 {arm}: {v['verdict']}")
     print(f"H3 after hack-rate matching: {out['H3_after_matching']}")
+    mixed = {"mixed_h3": out["mixed_h3"], "mixed_h3_random_slope": out["mixed_h3_random_slope"],
+             **{f"mixed_h3_seed{s}": m for s, m in out["mixed_h3_per_seed"].items()}}
+    for key, m in mixed.items():
+        print(f"{key}: R1 x pays {m['H3']['estimate']:+.3f} log-odds (se {m['H3']['se']:.3f}), 90% "
+              f"[{m['H3']['ci'][0]:+.3f}, {m['H3']['ci'][1]:+.3f}], one-sided p {m['H3']['p_one_sided']:.3f}; "
+              f"random SDs {', '.join(f'{k} {v:.3f}' for k, v in m['random_sd'].items())}"
+              f"{'' if m['converged'] else ' (NOT CONVERGED)'}"
+              f"{'' if m['identified'] else ' (NOT IDENTIFIED: ' + '; '.join(m['separation']) + ')'}")
     print(f"wrote {path}")
 
 
