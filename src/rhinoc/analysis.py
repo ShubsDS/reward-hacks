@@ -3,7 +3,8 @@
 Input: `results/battery_items.jsonl` (scripts/eval_battery.py summarize), one record per
 sample with keys target, condition, channel, vocab, cluster, pays, exploit, answered,
 truncated; plus the in-training line-off `apps` hack rates from
-`runs/rl/<run>/checkpoint_evals/metrics.jsonl`. Stdlib only.
+`runs/rl/<run>/checkpoint_evals/metrics.jsonl`. Stdlib only, except `mixed_h3`
+which imports numpy and scipy (rhinoc.glmm) when called.
 """
 
 from __future__ import annotations
@@ -275,3 +276,65 @@ def h3_robust(h3: dict, matched: dict) -> str:
     if h3["verdict"] == "supported" and any(m.get("point") is not None and m["point"] < 0 for m in matched.values()):
         return "suggestive"
     return h3["verdict"]
+
+
+# ---- Robustness check 6: mixed-effects logistic regression -------------------------
+
+MIXED_ARMS = ("R2", "R0", "R1")
+"""Arm levels; the first (R2) is the reference, so the arm-R1 x pays coefficient is H3's
+R1-vs-R2 difference in reward-conditionality on the log-odds scale."""
+
+
+def mixed_h3(items: Sequence[dict], channels: Sequence[str], random_slope: bool = False,
+             seeds: Sequence[int] = SEEDS) -> dict:
+    """exploit ~ arm x pays + (1 | scenario) + (1 | run) on every run's final checkpoint, no
+    line, the RS channels pooled, unanswered samples dropped (as the primary analysis).
+    Exploratory variants, not pre-registered: `random_slope` adds an independent
+    (0 + pays | run) term; a single seed in `seeds` fits that seed alone, without the run term
+    (one run per arm). Needs numpy and scipy (rhinoc.glmm)."""
+    import numpy as np
+
+    from rhinoc.glmm import fit_logit_glmm, wald
+
+    counts: dict[tuple, list[int]] = {}
+    for arm in MIXED_ARMS:
+        for s in seeds:
+            run = f"{arm}-s{s}"
+            target = final_target(items, run)
+            for ch in channels:
+                for cluster, pays, exploit in channel_items(items, target, "none", ch):
+                    c = counts.setdefault((arm, run, f"{ch}/{cluster}", pays), [0, 0])
+                    c[0] += exploit
+                    c[1] += 1
+    keys = sorted(counts)
+    names = ["(Intercept)", *(f"arm{a}" for a in MIXED_ARMS[1:]), "pays", *(f"arm{a}:pays" for a in MIXED_ARMS[1:])]
+    X = np.array([[1.0, *(float(arm == a) for a in MIXED_ARMS[1:]), float(pays),
+                   *(float(arm == a and pays) for a in MIXED_ARMS[1:])] for arm, _, _, pays in keys])
+    terms = {"scenario": ([k[2] for k in keys], None)}
+    if len(seeds) > 1:
+        terms["run"] = ([k[1] for k in keys], None)
+    if random_slope:
+        terms["run:pays"] = ([k[1] for k in keys], [float(k[3]) for k in keys])
+    fit = fit_logit_glmm([counts[k][0] for k in keys], [counts[k][1] for k in keys], X, names, terms)
+    h3 = fit["fixed"]["armR1:pays"]
+    # an arm x pays cell (pooled over the fitted runs) with no exploits, or only exploits,
+    # leaves its log-odds unbounded: the fixed effects are then not identified
+    cells: dict[tuple, list[int]] = {}
+    for (arm, _, _, pays), (y, n) in counts.items():
+        c = cells.setdefault((arm, pays), [0, 0])
+        c[0] += y
+        c[1] += n
+    separated = [f"{arm} {'pays' if pays else 'no-pay'}: {y}/{n}" for (arm, pays), (y, n) in sorted(cells.items())
+                 if y in (0, n)]
+    return {
+        "formula": "exploit ~ arm * pays + (1 | scenario)" + (" + (1 | run)" if len(seeds) > 1 else "")
+                   + (" + (0 + pays | run)" if random_slope else ""),
+        "reference_arm": MIXED_ARMS[0],
+        "targets": {f"{a}-s{s}": final_target(items, f"{a}-s{s}") for a in MIXED_ARMS for s in seeds},
+        "channels": list(channels),
+        **{k: v for k, v in fit.items() if k != "vcov"},
+        "separation": separated,
+        "identified": not separated,
+        "H3": {"term": "armR1:pays", "estimate": h3["estimate"], "se": h3["se"],
+               **wald(h3["estimate"], h3["se"], 0.90, +1)},
+    }
