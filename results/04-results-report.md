@@ -182,7 +182,7 @@ Each figure is the percentage of answers Luna marks misaligned, at step 32 with 
 | Nov 2–5 (six runs and their evals, both batteries, storage) | $427.50 Tinker billed (sampling $308.33, training $116.42, storage $2.76) |
 | Judging (both batteries, calibration) | ≈ $28 OpenAI, estimated |
 | **Total** | **≈ $663 of $950** |
-| Ongoing storage | Since 2026-11-11 only the six step-32 samplers, ≈ 78 GiB ≈ $7.8/month until deleted (before that, 20 checkpoints, 256 GiB ≈ $26/month; ≈ $5 accrued Nov 5–10) |
+| Ongoing storage | Since 2026-11-11 only the six step-32 samplers, ≈ 78 GiB: **$0/month**, because Tinker doesn't bill storage under 100 GB. Before that, 20 checkpoints, 256 GiB ≈ $26/month (≈ $6 accrued Nov 5–11) |
 
 ---
 
@@ -190,4 +190,4 @@ Each figure is the percentage of answers Luna marks misaligned, at step 32 with 
 
 1. **Hand labels (yours):** the five battery sheets in `runs/battery/hand_labels_<eval>.csv` (400 items) and the gate sheet (80). They settle H6–H7. They can't change H1–H5.
 2. **Re-run `analyze.py hypotheses`** after the labels, plus any Terra re-scoring an eval needs. Then update H6–H7 here.
-3. **Storage:** the gate and step-16 samplers were deleted on 2026-11-11. Decide whether to keep the six step-32 samplers (≈ $7.8/month) for follow-up evals or sharing.
+3. **Storage:** the gate and step-16 samplers were deleted on 2026-11-11. The six step-32 samplers stay under Tinker's free 100 GB, so keeping them costs nothing.
